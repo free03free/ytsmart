@@ -1,0 +1,12 @@
+R_DEF: Internal format may change without notice
+local
+string app_update_new_version
+string cancel
+string cant_download_msg
+string no_external_storage_error
+string pref_check_updates_title
+string pref_min_interval_summary
+string pref_min_interval_title
+string upgrade
+xml provider_paths
+xml upd_prefs

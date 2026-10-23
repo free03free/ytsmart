@@ -1,0 +1,53 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.liskovsoft.appupdatechecker2" >
+4
+5    <uses-sdk android:minSdkVersion="17" />
+5-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml
+6
+7    <uses-permission android:name="android.permission.INTERNET" />
+7-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:5:5-66
+7-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:5:22-64
+8    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+8-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:6:5-78
+8-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:6:22-76
+9    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+9-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:7:5-79
+9-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:7:22-77
+10    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+10-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:8:5-80
+10-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:8:22-78
+11    <!-- Android 8.0 updater fix -->
+12    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+12-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:10:5-82
+12-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:10:22-80
+13    <!-- Add requestLegacyExternalStorage to fix unavailable storage on Android 10 (doesn't work on Android 11) -->
+14    <!-- More info: https://stackoverflow.com/questions/63364476/requestlegacyexternalstorage-is-not-working-in-android-11-api-30 -->
+15    <application android:requestLegacyExternalStorage="true" >
+15-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:14:5-27:19
+15-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:14:18-61
+16
+17        <!-- Read more: https://stackoverflow.com/questions/38200282/android-os-fileuriexposedexception-file-storage-emulated-0-test-txt-exposed -->
+18        <!-- Usage: see com.liskovsoft.sharedutils.helpers.FileHelpers.getFileUri(Context, String) -->
+19        <provider
+19-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:17:9-26:20
+20            android:name="androidx.core.content.FileProvider"
+20-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:18:13-62
+21            android:authorities="${applicationId}.update_provider"
+21-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:19:13-67
+22            android:exported="false"
+22-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:20:13-37
+23            android:grantUriPermissions="true" >
+23-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:21:13-47
+24
+25            <!-- Details: https://developer.android.com/reference/android/support/v4/content/FileProvider.html#SpecifyFiles -->
+26            <meta-data
+26-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:23:13-25:57
+27                android:name="android.support.FILE_PROVIDER_PATHS"
+27-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:24:17-67
+28                android:resource="@xml/provider_paths" />
+28-->/proj/SharedModules/appupdatechecker2/src/main/AndroidManifest.xml:25:17-55
+29        </provider>
+30    </application>
+31
+32</manifest>
