@@ -1,0 +1,6 @@
+def rootDir = gradle.ext.mediaServiceCoreRoot
+
+
+include ':mediaserviceinterfaces', ':youtubeapi'
+project(':mediaserviceinterfaces').projectDir = new File(rootDir, 'mediaserviceinterfaces')
+project(':youtubeapi').projectDir = new File(rootDir, 'youtubeapi')
