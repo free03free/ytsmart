@@ -1,0 +1,18 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "PACKAGED_MANIFESTS",
+    "kind": "Directory"
+  },
+  "applicationId": "com.liskovsoft.youtubeapi",
+  "variantName": "ststableDebug",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "attributes": [],
+      "outputFile": "../../merged_manifest/ststableDebug/AndroidManifest.xml"
+    }
+  ],
+  "elementType": "File"
+}
