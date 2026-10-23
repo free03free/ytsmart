@@ -1,0 +1,5 @@
+R_DEF: Internal format may change without notice
+local
+id root
+id surface_view
+layout exo_testutils_host_activity
