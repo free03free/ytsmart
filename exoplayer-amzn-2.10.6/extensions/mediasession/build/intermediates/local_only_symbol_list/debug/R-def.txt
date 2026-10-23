@@ -1,0 +1,8 @@
+R_DEF: Internal format may change without notice
+local
+drawable exo_media_action_repeat_all
+drawable exo_media_action_repeat_off
+drawable exo_media_action_repeat_one
+string exo_media_action_repeat_all_description
+string exo_media_action_repeat_off_description
+string exo_media_action_repeat_one_description
