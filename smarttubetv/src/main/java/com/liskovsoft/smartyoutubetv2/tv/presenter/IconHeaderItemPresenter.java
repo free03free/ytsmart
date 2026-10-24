@@ -3,6 +3,7 @@ package com.liskovsoft.smartyoutubetv2.tv.presenter;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.liskovsoft.sharedutils.mylogger.Log;
+import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.util.ViewUtil;
 
@@ -46,6 +48,13 @@ public class IconHeaderItemPresenter extends RowHeaderPresenter {
 
         View view = inflater.inflate(R.layout.icon_header_item, null);
         view.setAlpha(mUnselectedAlpha); // Initialize icons to be at half-opacity.
+
+        float scale = MainUIData.instance(viewGroup.getContext()).getSidebarScale();
+        TextView headerLabel = view.findViewById(R.id.header_label);
+        if (headerLabel != null && scale > 0 && Math.abs(scale - 1f) > 0.001f) {
+            headerLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX, headerLabel.getTextSize() * scale);
+            headerLabel.setMaxWidth((int) (headerLabel.getMaxWidth() * Math.max(1f, scale)));
+        }
 
         return new ViewHolder(view);
     }

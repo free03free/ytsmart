@@ -28,6 +28,7 @@ public class AppDialogActivity extends MotherActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        androidx.leanback.widget.GuidedActionsStylist.sTextScale = MainUIData.instance(this).getDialogTextScale();
         setContentView(R.layout.fragment_app_settings);
         // Can't use getSupportFragmentManager because AppDialogFragment isn't subclass of androidx fragment
         mFragment = (AppDialogFragment) getFragmentManager().findFragmentById(R.id.app_settings_fragment);

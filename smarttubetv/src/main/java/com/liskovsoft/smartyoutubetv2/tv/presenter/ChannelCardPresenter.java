@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION;
 import android.util.Pair;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,6 +64,11 @@ public class ChannelCardPresenter extends LongClickPresenter {
         TextView textView = container.findViewById(R.id.channel_title);
         textView.setBackgroundColor(mDefaultBackgroundColor);
         textView.setTextColor(mDefaultTextColor);
+
+        float textScale = MainUIData.instance(context).getChannelCardScale();
+        if (textScale > 0 && Math.abs(textScale - 1f) > 0.001f) {
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textView.getTextSize() * textScale);
+        }
 
         boolean autoScrollEnabled = isCardTextAutoScrollEnabled(context);
         if (autoScrollEnabled) {

@@ -892,4 +892,10 @@
     <string name="library_reorder">Reorder these settings</string>
     <string name="library_reorder_done">Done</string>
     <string name="library_kids_title">Kids mode</string>
+    <string name="video_title_size">Video title size</string>
+    <string name="video_subtitle_size">Video subtitle size (channel, views)</string>
+    <string name="settings_card_size">Settings text size</string>
+    <string name="dialog_text_size">Settings menus text size</string>
+    <string name="sidebar_text_size">Side menu text size</string>
+    <string name="channel_card_size">Channel name size</string>
 </resources>

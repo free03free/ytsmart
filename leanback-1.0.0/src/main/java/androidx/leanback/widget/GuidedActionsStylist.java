@@ -142,6 +142,23 @@ import java.util.List;
  */
 public class GuidedActionsStylist implements FragmentAnimationProvider {
 
+    // MOD: user controlled font size of dialog (settings) items; set by the dialog activity
+    public static float sTextScale = 1f;
+
+    private static ViewHolder applyTextScale(ViewHolder vh) {
+        if (sTextScale > 0 && Math.abs(sTextScale - 1f) > 0.001f) {
+            scaleText(vh.mTitleView);
+            scaleText(vh.mDescriptionView);
+        }
+        return vh;
+    }
+
+    private static void scaleText(TextView view) {
+        if (view != null) {
+            view.setTextSize(TypedValue.COMPLEX_UNIT_PX, view.getTextSize() * sTextScale);
+        }
+    }
+
     /**
      * Default viewType that associated with default layout Id for the action item.
      * @see #getItemViewType(GuidedAction)
@@ -651,7 +668,7 @@ public class GuidedActionsStylist implements FragmentAnimationProvider {
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View v = inflater.inflate(onProvideItemLayoutId(), parent, false);
-        return new ViewHolder(v, parent == mSubActionsGridView);
+        return applyTextScale(new ViewHolder(v, parent == mSubActionsGridView));
     }
 
     /**
@@ -670,7 +687,7 @@ public class GuidedActionsStylist implements FragmentAnimationProvider {
         }
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View v = inflater.inflate(onProvideItemLayoutId(viewType), parent, false);
-        return new ViewHolder(v, parent == mSubActionsGridView);
+        return applyTextScale(new ViewHolder(v, parent == mSubActionsGridView));
     }
 
     /**

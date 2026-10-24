@@ -77,6 +77,8 @@ public class VideoCardPresenter extends LongClickPresenter {
 
         cardView.setTitleLinesNum(isCardMultilineTitleEnabled ? 2 : 1);
         cardView.setContentLinesNum(isCardMultilineSubtitleEnabled ? 2 : 1);
+        cardView.setTitleTextScale(getVideoTitleScale(context));
+        cardView.setContentTextScale(getVideoSubtitleScale(context));
         cardView.enableTextAutoScroll(isCardTextAutoScrollEnabled);
         cardView.setTextScrollSpeed(cardTextScrollSpeed);
         cardView.setFocusable(true);
@@ -212,6 +214,14 @@ public class VideoCardPresenter extends LongClickPresenter {
 
     protected boolean isCardMultilineSubtitleEnabled(Context context) {
         return MainUIData.instance(context).isCardMultilineSubtitleEnabled();
+    }
+
+    protected float getVideoTitleScale(Context context) {
+        return MainUIData.instance(context).getVideoTitleScale();
+    }
+
+    protected float getVideoSubtitleScale(Context context) {
+        return MainUIData.instance(context).getVideoSubtitleScale();
     }
 
     protected float getCardTextScrollSpeed(Context context) {

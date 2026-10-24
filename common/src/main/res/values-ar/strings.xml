@@ -884,4 +884,10 @@
     <string name="library_reorder">ترتيب عناصر الإعدادات</string>
     <string name="library_reorder_done">تم</string>
     <string name="library_kids_title">وضع الأطفال</string>
+    <string name="video_title_size">حجم عناوين الفيديوهات</string>
+    <string name="video_subtitle_size">حجم النص الفرعي للفيديو (القناة والمشاهدات)</string>
+    <string name="settings_card_size">حجم خط الإعدادات</string>
+    <string name="dialog_text_size">حجم خط قوائم الإعدادات</string>
+    <string name="sidebar_text_size">حجم خط القائمة الجانبية</string>
+    <string name="channel_card_size">حجم أسماء القنوات</string>
 </resources>

@@ -3,6 +3,7 @@ package com.liskovsoft.smartyoutubetv2.tv.presenter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build.VERSION;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +46,11 @@ public class SettingsCardPresenter extends Presenter {
         TextView textView = container.findViewById(R.id.settings_title);
         textView.setBackgroundColor(mDefaultBackgroundColor);
         textView.setTextColor(mDefaultTextColor);
+
+        float textScale = MainUIData.instance(context).getSettingsCardScale();
+        if (textScale > 0 && Math.abs(textScale - 1f) > 0.001f) {
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textView.getTextSize() * textScale);
+        }
 
         ViewUtil.setTextScrollSpeed(textView, getCardTextScrollSpeed(context));
 

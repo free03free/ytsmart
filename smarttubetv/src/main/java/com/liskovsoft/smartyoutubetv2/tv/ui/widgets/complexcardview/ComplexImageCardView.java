@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 import androidx.leanback.widget.ImageCardView;
@@ -152,6 +153,28 @@ public class ComplexImageCardView extends ImageCardView {
 
         contentView.setMaxLines(lines);
         contentView.setLines(lines);
+    }
+
+    /**
+     * Multiplies the current title font size. Call once, right after the card is created.
+     */
+    public void setTitleTextScale(float scale) {
+        scaleTextSize(findViewById(R.id.title_text), scale);
+    }
+
+    /**
+     * Multiplies the current subtitle (channel, views...) font size. Call once, right after the card is created.
+     */
+    public void setContentTextScale(float scale) {
+        scaleTextSize(findViewById(R.id.content_text), scale);
+    }
+
+    private void scaleTextSize(TextView view, float scale) {
+        if (view == null || scale <= 0 || Math.abs(scale - 1f) < 0.001f) {
+            return;
+        }
+
+        view.setTextSize(TypedValue.COMPLEX_UNIT_PX, view.getTextSize() * scale);
     }
 
     public void enableBadge(boolean enabled) {

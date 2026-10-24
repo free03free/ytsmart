@@ -61,6 +61,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         //appendPlaylistsCategoryStyle(settingsPresenter);
         appendScaleUI(settingsPresenter);
         appendRowTitleStyle(settingsPresenter);
+        appendTextSizes(settingsPresenter);
         if (Build.VERSION.SDK_INT > 19) {
             appendVideoGridScale(settingsPresenter);
         }
@@ -275,6 +276,43 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
                     mRestartApp = true;
                 },
                 mMainUIData.isRowTitleBold()));
+    }
+
+    private interface ScaleSetter {
+        void set(float scale);
+    }
+
+    /**
+     * Independent font size for every kind of text: video titles, video subtitles and settings cards.
+     */
+    private void appendTextSizes(AppDialogPresenter settingsPresenter) {
+        appendTextSize(settingsPresenter, R.string.video_title_size, mMainUIData.getVideoTitleScale(),
+                scale -> mMainUIData.setVideoTitleScale(scale));
+        appendTextSize(settingsPresenter, R.string.video_subtitle_size, mMainUIData.getVideoSubtitleScale(),
+                scale -> mMainUIData.setVideoSubtitleScale(scale));
+        appendTextSize(settingsPresenter, R.string.settings_card_size, mMainUIData.getSettingsCardScale(),
+                scale -> mMainUIData.setSettingsCardScale(scale));
+        appendTextSize(settingsPresenter, R.string.dialog_text_size, mMainUIData.getDialogTextScale(),
+                scale -> mMainUIData.setDialogTextScale(scale));
+        appendTextSize(settingsPresenter, R.string.sidebar_text_size, mMainUIData.getSidebarScale(),
+                scale -> mMainUIData.setSidebarScale(scale));
+        appendTextSize(settingsPresenter, R.string.channel_card_size, mMainUIData.getChannelCardScale(),
+                scale -> mMainUIData.setChannelCardScale(scale));
+    }
+
+    private void appendTextSize(AppDialogPresenter settingsPresenter, int titleResId, float current, ScaleSetter setter) {
+        List<OptionItem> options = new ArrayList<>();
+
+        for (float scale : new float[] {0.7f, 0.8f, 0.9f, 1.0f, 1.1f, 1.2f, 1.3f, 1.4f, 1.5f, 1.7f, 2.0f}) {
+            options.add(UiOptionItem.from(String.format("%sx", Helpers.formatFloat(scale)),
+                    optionItem -> {
+                        setter.set(scale);
+                        mRestartApp = true;
+                    },
+                    Helpers.floatEquals(scale, current)));
+        }
+
+        settingsPresenter.appendRadioCategory(getContext().getString(titleResId), options);
     }
 
     private void appendCardTextScrollSpeed(AppDialogPresenter settingsPresenter) {

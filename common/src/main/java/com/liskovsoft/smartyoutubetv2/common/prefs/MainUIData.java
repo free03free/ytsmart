@@ -102,6 +102,12 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
     private float mRowTitleScale;
     private int mRowTitleColor;
     private boolean mIsRowTitleBold;
+    private float mVideoTitleScale;
+    private float mVideoSubtitleScale;
+    private float mSettingsCardScale;
+    private float mDialogTextScale;
+    private float mSidebarScale;
+    private float mChannelCardScale;
     private float mVideoGridScale;
     private final List<ColorScheme> mColorSchemes = new ArrayList<>();
     private int mColorSchemeIndex;
@@ -222,6 +228,60 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
 
     public void setRowTitleBold(boolean bold) {
         mIsRowTitleBold = bold;
+        persistState();
+    }
+
+    public float getVideoTitleScale() {
+        return mVideoTitleScale;
+    }
+
+    public void setVideoTitleScale(float scale) {
+        mVideoTitleScale = scale;
+        persistState();
+    }
+
+    public float getVideoSubtitleScale() {
+        return mVideoSubtitleScale;
+    }
+
+    public void setVideoSubtitleScale(float scale) {
+        mVideoSubtitleScale = scale;
+        persistState();
+    }
+
+    public float getSettingsCardScale() {
+        return mSettingsCardScale;
+    }
+
+    public void setSettingsCardScale(float scale) {
+        mSettingsCardScale = scale;
+        persistState();
+    }
+
+    public float getDialogTextScale() {
+        return mDialogTextScale;
+    }
+
+    public void setDialogTextScale(float scale) {
+        mDialogTextScale = scale;
+        persistState();
+    }
+
+    public float getSidebarScale() {
+        return mSidebarScale;
+    }
+
+    public void setSidebarScale(float scale) {
+        mSidebarScale = scale;
+        persistState();
+    }
+
+    public float getChannelCardScale() {
+        return mChannelCardScale;
+    }
+
+    public void setChannelCardScale(float scale) {
+        mChannelCardScale = scale;
         persistState();
     }
 
@@ -569,6 +629,12 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
         mRowTitleScale = Helpers.parseFloat(split, 24, 1.3f);
         mRowTitleColor = Helpers.parseInt(split, 25, 0);
         mIsRowTitleBold = Helpers.parseBoolean(split, 26, true);
+        mVideoTitleScale = Helpers.parseFloat(split, 27, 1.0f);
+        mVideoSubtitleScale = Helpers.parseFloat(split, 28, 1.0f);
+        mSettingsCardScale = Helpers.parseFloat(split, 29, 1.0f);
+        mDialogTextScale = Helpers.parseFloat(split, 30, 1.0f);
+        mSidebarScale = Helpers.parseFloat(split, 31, 1.0f);
+        mChannelCardScale = Helpers.parseFloat(split, 32, 1.0f);
 
         int idx = -1;
         for (Long menuItem : MENU_ITEM_DEFAULT_ORDER) {
@@ -617,7 +683,9 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
                 null, mThumbQuality, mIsCardMultilineSubtitleEnabled, Helpers.mergeList(mMenuItemsOrdered),
                 mIsChannelsFilterEnabled, mIsChannelSearchBarEnabled, mIsPinnedChannelRowsEnabled, mCardPreviewType,
                 mIsUnlocalizedTitlesEnabled, mUiTweaks,
-                mRowTitleScale, mRowTitleColor, mIsRowTitleBold));
+                mRowTitleScale, mRowTitleColor, mIsRowTitleBold,
+                mVideoTitleScale, mVideoSubtitleScale, mSettingsCardScale,
+                mDialogTextScale, mSidebarScale, mChannelCardScale));
     }
 
     public static class ColorScheme {
