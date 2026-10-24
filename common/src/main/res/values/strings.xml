@@ -756,4 +756,6 @@
         <item quantity="one">%s second</item>
         <item quantity="other">%s seconds</item>
     </plurals>
+    <string name="header_playlist_library">Playlist library</string>
+    <string name="playlist_library_mine">My playlists</string>
 </resources>

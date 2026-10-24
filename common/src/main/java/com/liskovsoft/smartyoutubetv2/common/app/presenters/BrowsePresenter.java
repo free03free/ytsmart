@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.PlaylistLibraryService;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
@@ -204,6 +205,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         mSectionsMapping.put(MediaGroup.TYPE_BLOCKED_CHANNELS,
                 new BrowseSection(MediaGroup.TYPE_BLOCKED_CHANNELS, getContext().getString(R.string.header_blocked_channels), BrowseSection.TYPE_GRID, R.drawable.icon_blocked_channels, false));
         mSectionsMapping.put(MediaGroup.TYPE_USER_PLAYLISTS, new BrowseSection(MediaGroup.TYPE_USER_PLAYLISTS, getContext().getString(R.string.header_playlists), BrowseSection.TYPE_ROW, R.drawable.icon_playlist, false));
+        mSectionsMapping.put(PlaylistLibraryService.SECTION_ID, new BrowseSection(PlaylistLibraryService.SECTION_ID, getContext().getString(R.string.header_playlist_library), BrowseSection.TYPE_ROW, R.drawable.icon_playlist, true));
         mSectionsMapping.put(MediaGroup.TYPE_NOTIFICATIONS, new BrowseSection(MediaGroup.TYPE_NOTIFICATIONS, getContext().getString(R.string.header_notifications), BrowseSection.TYPE_GRID, R.drawable.icon_notification, false));
         mSectionsMapping.put(MediaGroup.TYPE_PLAYBACK_QUEUE, new BrowseSection(MediaGroup.TYPE_PLAYBACK_QUEUE, getContext().getString(R.string.playback_queue_category_title), BrowseSection.TYPE_GRID, R.drawable.icon_queue, false));
 
@@ -222,6 +224,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         mRowMapping.put(MediaGroup.TYPE_MUSIC, getContentService().getMusicObserve());
         mRowMapping.put(MediaGroup.TYPE_GAMING, getContentService().getGamingObserve());
         mRowMapping.put(MediaGroup.TYPE_USER_PLAYLISTS, getContentService().getPlaylistRowsObserve());
+        mRowMapping.put(PlaylistLibraryService.SECTION_ID, PlaylistLibraryService.getLibraryObserve(getContext(), getContentService()));
 
         mGridMapping.put(MediaGroup.TYPE_SHORTS, getContentService().getShortsObserve());
         mGridMapping.put(MediaGroup.TYPE_SUBSCRIPTIONS, getContentService().getSubscriptionsObserve());
