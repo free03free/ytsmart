@@ -756,4 +756,26 @@
   <string name="removed_from_library">تمت الإزالة من مكتبة القوائم</string>
   <string name="add_to_library">إضافة إلى مكتبة القوائم</string>
   <string name="playlist_library_channels">القنوات المحفوظة</string>
+  <string name="library_settings_title">إعدادات مكتبة القوائم</string>
+  <string name="library_cat_shelves">الصفوف المعروضة</string>
+  <string name="library_opt_saved_playlists">القوائم المحفوظة</string>
+  <string name="library_opt_saved_channels">القنوات المحفوظة</string>
+  <string name="library_opt_mine">قوائمي (من الحساب)</string>
+  <string name="library_opt_saved_channel_shelves">صف لكل قناة محفوظة</string>
+  <string name="library_opt_subscribed_shelves">صف لكل قناة مشترك بها</string>
+  <string name="library_cat_details">تفاصيل</string>
+  <string name="library_opt_hide_system">إخفاء «المشاهدة لاحقًا» و«فيديوهات أعجبتك»</string>
+  <string name="library_opt_show_count">إظهار العدد في عناوين الصفوف</string>
+  <string name="library_cat_order">ترتيب الصفوف</string>
+  <string name="library_order_saved_first">المحفوظ أولًا</string>
+  <string name="library_order_account_first">قوائم الحساب أولًا</string>
+  <string name="library_cat_channel_content">محتوى صف القناة</string>
+  <string name="library_content_playlists">القوائم فقط</string>
+  <string name="library_content_playlists_or_videos">القوائم، وإن لم توجد فأحدث الفيديوهات</string>
+  <string name="library_content_videos">أحدث الفيديوهات فقط</string>
+  <string name="library_cat_max_channels">أقصى عدد لصفوف القنوات المشترك بها</string>
+  <string name="library_cat_items_per_shelf">أقصى عدد عناصر في صف القناة</string>
+  <string name="library_reset">إعادة ضبط إعدادات المكتبة</string>
+  <string name="library_reset_done">تمت إعادة ضبط إعدادات المكتبة</string>
+  <string name="library_reopen_hint">أعد فتح مكتبة القوائم لتطبيق التغييرات</string>
 </resources>

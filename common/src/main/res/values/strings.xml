@@ -764,4 +764,26 @@
     <string name="removed_from_library">Removed from Playlist library</string>
     <string name="add_to_library">Add to Playlist library</string>
     <string name="playlist_library_channels">Saved channels</string>
+    <string name="library_settings_title">Playlist library settings</string>
+    <string name="library_cat_shelves">Shelves to show</string>
+    <string name="library_opt_saved_playlists">Saved playlists</string>
+    <string name="library_opt_saved_channels">Saved channels</string>
+    <string name="library_opt_mine">My playlists (account)</string>
+    <string name="library_opt_saved_channel_shelves">A shelf for each saved channel</string>
+    <string name="library_opt_subscribed_shelves">A shelf for each subscribed channel</string>
+    <string name="library_cat_details">Details</string>
+    <string name="library_opt_hide_system">Hide Watch later and Liked videos</string>
+    <string name="library_opt_show_count">Show item count in shelf titles</string>
+    <string name="library_cat_order">Shelf order</string>
+    <string name="library_order_saved_first">Saved first</string>
+    <string name="library_order_account_first">Account playlists first</string>
+    <string name="library_cat_channel_content">Channel shelf content</string>
+    <string name="library_content_playlists">Playlists only</string>
+    <string name="library_content_playlists_or_videos">Playlists, otherwise latest videos</string>
+    <string name="library_content_videos">Latest videos only</string>
+    <string name="library_cat_max_channels">Max subscribed channel shelves</string>
+    <string name="library_cat_items_per_shelf">Max items per channel shelf</string>
+    <string name="library_reset">Reset library settings</string>
+    <string name="library_reset_done">Library settings reset</string>
+    <string name="library_reopen_hint">Reopen the Playlist library to apply changes</string>
 </resources>
