@@ -186,11 +186,15 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
     }
 
     protected void appendSaveRemovePlaylistButton() {
-        if (!mIsSaveRemovePlaylistEnabled) {
+        Video original = getVideo();
+
+        // Playlist cards always get the "save playlist" button (it is the only way to subscribe to a playlist),
+        // even if the user disabled this item in the menu settings.
+        boolean isPlaylistCard = original != null && original.itemType == MediaItem.TYPE_PLAYLIST;
+
+        if (!mIsSaveRemovePlaylistEnabled && !isPlaylistCard) {
             return;
         }
-
-        Video original = getVideo();
 
         if (original == null || (!original.hasPlaylist() && !original.isPlaylistAsChannel() && !original.belongsToUserPlaylists())) {
             return;
