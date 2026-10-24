@@ -841,4 +841,8 @@
     <string name="row_title_color_green">أخضر</string>
     <string name="row_title_color_pink">وردي</string>
     <string name="row_title_color_black">أسود</string>
+    <string name="library_custom">مخصص…</string>
+    <string name="library_custom_current">مخصص: %d</string>
+    <string name="library_custom_prompt">أدخل رقمًا</string>
+    <string name="library_custom_invalid">أدخل رقمًا صحيحًا أكبر من 0</string>
 </resources>

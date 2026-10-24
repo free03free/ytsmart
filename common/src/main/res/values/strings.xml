@@ -849,4 +849,8 @@
     <string name="row_title_color_green">Green</string>
     <string name="row_title_color_pink">Pink</string>
     <string name="row_title_color_black">Black</string>
+    <string name="library_custom">Custom…</string>
+    <string name="library_custom_current">Custom: %d</string>
+    <string name="library_custom_prompt">Enter a number</string>
+    <string name="library_custom_invalid">Enter a whole number greater than 0</string>
 </resources>

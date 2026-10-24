@@ -46,6 +46,52 @@ public class LibrarySettingsPresenter extends BasePresenter<Void> {
         showSettings();
     }
 
+    private interface IntSetter {
+        void set(int value);
+    }
+
+    private void appendNumberCategory(AppDialogPresenter dialog, int titleResId, int[] presets, int current, IntSetter setter) {
+        List<OptionItem> options = new ArrayList<>();
+        boolean isPreset = false;
+        for (int n : presets) {
+            if (n == current) {
+                isPreset = true;
+            }
+            options.add(UiOptionItem.from(String.valueOf(n), o -> setter.set(n), n == current));
+        }
+
+        String customTitle = isPreset ? str(R.string.library_custom)
+                : String.format(str(R.string.library_custom_current), current);
+        options.add(UiOptionItem.from(customTitle, o -> {
+            dialog.closeDialog();
+            SimpleEditDialog.show(getContext(), str(titleResId), str(R.string.library_custom_prompt),
+                    String.valueOf(current), value -> {
+                        int number = parsePositive(value);
+                        if (number <= 0) {
+                            MessageHelpers.showMessage(getContext(), str(R.string.library_custom_invalid));
+                            return false;
+                        }
+                        setter.set(number);
+                        showSettings();
+                        return true;
+                    });
+        }, !isPreset));
+
+        dialog.appendRadioCategory(str(titleResId), options);
+    }
+
+    private static int parsePositive(String value) {
+        if (value == null) {
+            return -1;
+        }
+        try {
+            long n = Long.parseLong(value.trim());
+            return n <= 0 ? -1 : (int) Math.min(n, 1_000_000L);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
     private void showSettings() {
         AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
 
@@ -85,30 +131,15 @@ public class LibrarySettingsPresenter extends BasePresenter<Void> {
         content.add(UiOptionItem.from(str(R.string.library_content_videos), o -> mSettings.setChannelContent(LibrarySettings.CHANNEL_CONTENT_VIDEOS), mSettings.getChannelContent() == LibrarySettings.CHANNEL_CONTENT_VIDEOS));
         dialog.appendRadioCategory(str(R.string.library_cat_channel_content), content);
 
-        // 5) Numbers
-        List<OptionItem> channels = new ArrayList<>();
-        for (int n : new int[] {3, 5, 10, 15, 25}) {
-            channels.add(UiOptionItem.from(String.valueOf(n), o -> mSettings.setMaxSubscribedChannels(n), mSettings.getMaxSubscribedChannels() == n));
-        }
-        dialog.appendRadioCategory(str(R.string.library_cat_max_channels), channels);
-
-        List<OptionItem> items = new ArrayList<>();
-        for (int n : new int[] {10, 20, 30, 50}) {
-            items.add(UiOptionItem.from(String.valueOf(n), o -> mSettings.setItemsPerShelf(n), mSettings.getItemsPerShelf() == n));
-        }
-        dialog.appendRadioCategory(str(R.string.library_cat_items_per_shelf), items);
-
-        List<OptionItem> latestTotal = new ArrayList<>();
-        for (int n : new int[] {15, 30, 50, 80}) {
-            latestTotal.add(UiOptionItem.from(String.valueOf(n), o -> mSettings.setLatestTotal(n), mSettings.getLatestTotal() == n));
-        }
-        dialog.appendRadioCategory(str(R.string.library_cat_latest_total), latestTotal);
-
-        List<OptionItem> latestPer = new ArrayList<>();
-        for (int n : new int[] {2, 3, 5, 8}) {
-            latestPer.add(UiOptionItem.from(String.valueOf(n), o -> mSettings.setLatestPerSource(n), mSettings.getLatestPerSource() == n));
-        }
-        dialog.appendRadioCategory(str(R.string.library_cat_latest_per_source), latestPer);
+        // 5) Numbers (presets + custom value)
+        appendNumberCategory(dialog, R.string.library_cat_max_channels, new int[] {3, 5, 10, 15, 25},
+                mSettings.getMaxSubscribedChannels(), mSettings::setMaxSubscribedChannels);
+        appendNumberCategory(dialog, R.string.library_cat_items_per_shelf, new int[] {10, 20, 30, 50},
+                mSettings.getItemsPerShelf(), mSettings::setItemsPerShelf);
+        appendNumberCategory(dialog, R.string.library_cat_latest_total, new int[] {15, 30, 50, 80},
+                mSettings.getLatestTotal(), mSettings::setLatestTotal);
+        appendNumberCategory(dialog, R.string.library_cat_latest_per_source, new int[] {2, 3, 5, 8},
+                mSettings.getLatestPerSource(), mSettings::setLatestPerSource);
 
         // 6) Collections
         dialog.appendSingleButton(UiOptionItem.from(str(R.string.collection_manage), o -> {
