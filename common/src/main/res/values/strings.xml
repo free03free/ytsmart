@@ -758,4 +758,8 @@
     </plurals>
     <string name="header_playlist_library">Playlist library</string>
     <string name="playlist_library_mine">My playlists</string>
+    <string name="playlist_library_saved">Saved playlists</string>
+    <string name="saved_to_library">Saved to Playlist library</string>
+    <string name="remove_from_library">Remove from Playlist library</string>
+    <string name="removed_from_library">Removed from Playlist library</string>
 </resources>

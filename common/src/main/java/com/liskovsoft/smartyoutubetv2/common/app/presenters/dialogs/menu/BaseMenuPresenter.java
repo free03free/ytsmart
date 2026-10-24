@@ -12,6 +12,7 @@ import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.BrowseSection;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.SimpleMediaItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.LocalPlaylistStore;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
@@ -200,6 +201,20 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
             return;
         }
 
+        String localId = original.playlistId != null ? original.playlistId : (original.mediaItem != null ? original.mediaItem.getPlaylistId() : null);
+        if (localId != null && LocalPlaylistStore.contains(getContext(), localId) && !original.belongsToUserPlaylists()) {
+            // Already subscribed locally: offer to unsubscribe
+            getDialogPresenter().appendSingleButton(
+                    UiOptionItem.from(
+                            getContext().getString(R.string.remove_from_library),
+                            optionItem -> {
+                                LocalPlaylistStore.remove(getContext(), localId);
+                                MessageHelpers.showMessage(getContext(), getContext().getString(R.string.removed_from_library));
+                                closeDialog();
+                            }));
+            return;
+        }
+
         getDialogPresenter().appendSingleButton(
                 UiOptionItem.from(
                         getContext().getString(original.belongsToUserPlaylists()? R.string.remove_playlist : R.string.save_playlist),
@@ -288,6 +303,7 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
     }
 
     private void removePlaylist(Video video) {
+        LocalPlaylistStore.remove(getContext(), video.playlistId);
         MediaItemService manager = YouTubeMediaItemService.instance();
         Observable<Void> action = manager.removePlaylistObserve(video.playlistId);
         RxHelper.execute(action,
@@ -303,10 +319,23 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
     }
 
     private void savePlaylist(Video video) {
+        String id = video.playlistId != null ? video.playlistId : (video.mediaItem != null ? video.mediaItem.getPlaylistId() : null);
+
+        // Always keep a local copy first: the library works even if the account call fails
+        Video local = Video.from(video);
+        local.playlistId = id;
+        boolean savedLocally = LocalPlaylistStore.add(getContext(), local);
+
         MediaItemService manager = YouTubeMediaItemService.instance();
         Observable<Void> action = video.mediaItem != null && video.mediaItem.getPlaylistId() != null ? manager.savePlaylistObserve(video.mediaItem) : manager.savePlaylistObserve(video.playlistId);
         RxHelper.execute(action,
-                (error) -> MessageHelpers.showMessage(getContext(), error.getLocalizedMessage()),
+                (error) -> {
+                    if (savedLocally) {
+                        MessageHelpers.showMessage(getContext(), getContext().getString(R.string.saved_to_library));
+                    } else {
+                        MessageHelpers.showMessage(getContext(), error.getLocalizedMessage());
+                    }
+                },
                 () -> MessageHelpers.showMessage(getContext(), getContext().getString(R.string.saved_to_playlists))
         );
     }

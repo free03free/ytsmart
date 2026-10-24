@@ -750,4 +750,8 @@
     </plurals>
   <string name="header_playlist_library">مكتبة القوائم</string>
   <string name="playlist_library_mine">قوائمي</string>
+  <string name="playlist_library_saved">القوائم المشترك بها</string>
+  <string name="saved_to_library">تم الحفظ في مكتبة القوائم</string>
+  <string name="remove_from_library">إزالة من مكتبة القوائم</string>
+  <string name="removed_from_library">تمت الإزالة من مكتبة القوائم</string>
 </resources>
