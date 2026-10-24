@@ -853,4 +853,27 @@
     <string name="library_custom_current">Custom: %d</string>
     <string name="library_custom_prompt">Enter a number</string>
     <string name="library_custom_invalid">Enter a whole number greater than 0</string>
+    <string name="collection_my">My collections</string>
+    <string name="collection_back">Back</string>
+    <string name="collection_items_count">%d items</string>
+    <string name="collection_search">Search library</string>
+    <string name="collection_search_prompt">Type a playlist or channel name</string>
+    <string name="collection_search_empty">no results</string>
+    <string name="collection_sort">Item order</string>
+    <string name="collection_sort_manual">Manual (as added)</string>
+    <string name="collection_sort_name">By name</string>
+    <string name="collection_sort_newest">Newest added first</string>
+    <string name="collection_pin">Pin to top of library</string>
+    <string name="collection_parent">Move inside a collection…</string>
+    <string name="collection_parent_none">None (top level)</string>
+    <string name="collection_icon">Change icon</string>
+    <string name="collection_icon_prompt">Type an emoji</string>
+    <string name="collection_cover">Collection cover</string>
+    <string name="collection_cover_auto">Automatic (first item)</string>
+    <string name="collection_items">Collection items</string>
+    <string name="collection_bulk_add">Add several items</string>
+    <string name="collection_bulk_empty">No saved playlists or channels yet</string>
+    <string name="collection_item_move_to">Move to:</string>
+    <string name="collection_item_remove">Remove from collection</string>
+    <string name="collection_sub_count">%d collections</string>
 </resources>

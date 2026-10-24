@@ -845,4 +845,27 @@
     <string name="library_custom_current">مخصص: %d</string>
     <string name="library_custom_prompt">أدخل رقمًا</string>
     <string name="library_custom_invalid">أدخل رقمًا صحيحًا أكبر من 0</string>
+    <string name="collection_my">مجموعاتي</string>
+    <string name="collection_back">رجوع</string>
+    <string name="collection_items_count">%d عناصر</string>
+    <string name="collection_search">🔍 بحث في المكتبة</string>
+    <string name="collection_search_prompt">اكتب اسم قائمة أو قناة</string>
+    <string name="collection_search_empty">لا نتائج</string>
+    <string name="collection_sort">ترتيب العناصر</string>
+    <string name="collection_sort_manual">يدوي (حسب الإضافة)</string>
+    <string name="collection_sort_name">حسب الاسم</string>
+    <string name="collection_sort_newest">الأحدث إضافة أولًا</string>
+    <string name="collection_pin">تثبيت في أعلى المكتبة</string>
+    <string name="collection_parent">نقل داخل مجموعة…</string>
+    <string name="collection_parent_none">بدون (مستوى رئيسي)</string>
+    <string name="collection_icon">تغيير الأيقونة</string>
+    <string name="collection_icon_prompt">اكتب رمزًا تعبيريًا (إيموجي)</string>
+    <string name="collection_cover">غلاف المجموعة</string>
+    <string name="collection_cover_auto">تلقائي (أول عنصر)</string>
+    <string name="collection_items">عناصر المجموعة</string>
+    <string name="collection_bulk_add">إضافة عدة عناصر</string>
+    <string name="collection_bulk_empty">لا توجد قوائم أو قنوات محفوظة بعد</string>
+    <string name="collection_item_move_to">نقل إلى:</string>
+    <string name="collection_item_remove">إزالة من المجموعة</string>
+    <string name="collection_sub_count">%d مجموعات</string>
 </resources>

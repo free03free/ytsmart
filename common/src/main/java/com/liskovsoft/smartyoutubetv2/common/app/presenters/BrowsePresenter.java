@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.LibraryCollections;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.PlaylistLibraryService;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
@@ -619,6 +620,17 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         if (getView() != null) {
             getView().removeSection(section);
         }
+    }
+
+    /** Back key inside an opened library collection / search: step out instead of leaving the screen. */
+    public boolean handleLibraryBack() {
+        if (mCurrentSection != null && mCurrentSection.getId() == PlaylistLibraryService.SECTION_ID
+                && LibraryCollections.hasOpen()) {
+            LibraryCollections.back(getContext());
+            refresh(false);
+            return true;
+        }
+        return false;
     }
 
     public void refresh() {

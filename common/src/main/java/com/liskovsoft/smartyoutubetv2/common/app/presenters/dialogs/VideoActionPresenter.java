@@ -3,8 +3,11 @@ package com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs;
 import android.content.Context;
 
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
+import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.ChannelUploadsPresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.LibraryCollections;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.PlaybackPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.SearchPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
@@ -25,6 +28,31 @@ public class VideoActionPresenter extends BasePresenter<Void> {
     public void apply(Video item) {
         if (item == null) {
             return;
+        }
+
+        // Library collections row: open a collection / go back / search
+        if (item.reloadPageKey != null) {
+            if (item.reloadPageKey.startsWith(LibraryCollections.MARK_OPEN)) {
+                LibraryCollections.setOpen(item.reloadPageKey.substring(LibraryCollections.MARK_OPEN.length()));
+                BrowsePresenter.instance(getContext()).refresh(false);
+                return;
+            } else if (item.reloadPageKey.equals(LibraryCollections.MARK_BACK)) {
+                LibraryCollections.back(getContext());
+                BrowsePresenter.instance(getContext()).refresh(false);
+                return;
+            } else if (item.reloadPageKey.equals(LibraryCollections.MARK_SEARCH)) {
+                com.liskovsoft.smartyoutubetv2.common.utils.SimpleEditDialog.show(getContext(),
+                        getContext().getString(R.string.collection_search),
+                        getContext().getString(R.string.collection_search_prompt), "", value -> {
+                            if (value == null || value.trim().isEmpty()) {
+                                return false;
+                            }
+                            LibraryCollections.setOpenSearch(value.trim());
+                            BrowsePresenter.instance(getContext()).refresh(false);
+                            return true;
+                        });
+                return;
+            }
         }
 
         // Show playlist contents in channel instead of instant playback

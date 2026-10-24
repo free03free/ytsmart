@@ -75,17 +75,66 @@ public class PlaylistLibraryService {
         if (!settings.isKidsMode() && settings.isSavedChannelsShown() && !savedChannels.isEmpty()) {
             localShelves.add(new LibraryGroup(null, title(settings, "\uD83D\uDCFA ", context.getString(R.string.playlist_library_channels), savedChannels.size()), savedChannels));
         }
+        String openName = LibraryCollections.getOpen();
+        if (openName != null && !LibraryCollections.exists(context, openName)) {
+            LibraryCollections.setOpen(null);
+            openName = null;
+        }
+        String openSearch = LibraryCollections.getOpenSearch();
+
+        if (openSearch != null && !settings.isKidsMode()) {
+            // Search results inside the library row
+            List<MediaItem> found = LibraryCollections.search(context, openSearch);
+            List<MediaItem> row = new ArrayList<>();
+            row.add(collectionCard(LibraryCollections.MARK_BACK, context.getString(R.string.collection_back), null, null));
+            row.addAll(found);
+            List<MediaGroup> results = new ArrayList<>();
+            String label = found.isEmpty() ? openSearch + " - " + context.getString(R.string.collection_search_empty) : openSearch;
+            results.add(new LibraryGroup(null, title(settings, "\uD83D\uDD0D ", label, found.size()), row));
+            return Observable.<List<MediaGroup>>just(results);
+        }
+
+        if (openName != null) {
+            // Opened collection: back card + sub-collections + its playlists/channels in one row
+            List<MediaItem> row = new ArrayList<>();
+            row.add(collectionCard(LibraryCollections.MARK_BACK, context.getString(R.string.collection_back), null, null));
+            for (String child : LibraryCollections.children(context, openName)) {
+                if (settings.isKidsMode() && !LibraryCollections.isKids(context, child)) {
+                    continue;
+                }
+                row.add(collectionCardFor(context, child));
+            }
+            List<MediaItem> items = LibraryCollections.items(context, openName);
+            row.addAll(items);
+            List<MediaGroup> opened = new ArrayList<>();
+            opened.add(new LibraryGroup(null, title(settings, LibraryCollections.getIcon(context, openName) + " ", openName, row.size() - 1), row));
+            return Observable.<List<MediaGroup>>just(opened);
+        }
+
         if (settings.isCollectionsShown() || settings.isKidsMode()) {
-            for (String name : LibraryCollections.names(context)) {
+            // One row "My collections": a card per top-level collection, side by side. Pinned first.
+            List<MediaItem> cards = new ArrayList<>();
+            List<MediaItem> pinnedCards = new ArrayList<>();
+            for (String name : LibraryCollections.children(context, null)) {
                 if (settings.isKidsMode() && !LibraryCollections.isKids(context, name)) {
                     continue; // kids mode: only collections marked "for kids"
                 }
                 if (settings.isRowHidden(LibrarySettings.collectionKey(name))) {
                     continue;
                 }
-                List<MediaItem> items = LibraryCollections.items(context, name);
-                if (!items.isEmpty()) {
-                    localShelves.add(new LibraryGroup(null, title(settings, "\uD83D\uDCC2 ", name, items.size()), items));
+                (LibraryCollections.isPinned(context, name) ? pinnedCards : cards).add(collectionCardFor(context, name));
+            }
+            List<MediaItem> all = new ArrayList<>(pinnedCards);
+            all.addAll(cards);
+            if (!all.isEmpty()) {
+                if (!settings.isKidsMode()) {
+                    all.add(0, collectionCard(LibraryCollections.MARK_SEARCH, context.getString(R.string.collection_search), null, null));
+                }
+                LibraryGroup group = new LibraryGroup(null, title(settings, "\uD83D\uDCC2 ", context.getString(R.string.collection_my), all.size() - (settings.isKidsMode() ? 0 : 1)), all);
+                if (!pinnedCards.isEmpty()) {
+                    localShelves.add(0, group); // pinned collections: the row goes to the very top
+                } else {
+                    localShelves.add(group);
                 }
             }
         }
@@ -267,6 +316,32 @@ public class PlaylistLibraryService {
         }
 
         return result;
+    }
+
+    private static MediaItem collectionCard(String marker, String title, String subtitle, String cover) {
+        com.liskovsoft.smartyoutubetv2.common.app.models.data.Video video = new com.liskovsoft.smartyoutubetv2.common.app.models.data.Video();
+        video.title = title;
+        video.secondTitle = subtitle;
+        video.cardImageUrl = cover;
+        video.reloadPageKey = marker;
+        return com.liskovsoft.smartyoutubetv2.common.app.models.data.SimpleMediaItem.from(video);
+    }
+
+    private static MediaItem collectionCardFor(Context context, String name) {
+        List<MediaItem> items = LibraryCollections.items(context, name);
+        String cover = LibraryCollections.getCover(context, name);
+        for (MediaItem item : items) {
+            if (cover == null && item.getCardImageUrl() != null) {
+                cover = item.getCardImageUrl();
+            }
+        }
+        int subs = LibraryCollections.children(context, name).size();
+        String subtitle = String.format(context.getString(R.string.collection_items_count), items.size());
+        if (subs > 0) {
+            subtitle += "  \u2022  " + String.format(context.getString(R.string.collection_sub_count), subs);
+        }
+        return collectionCard(LibraryCollections.MARK_OPEN + name,
+                LibraryCollections.getIcon(context, name) + " " + name, subtitle, cover);
     }
 
     private static String title(LibrarySettings settings, String icon, String name, int count) {

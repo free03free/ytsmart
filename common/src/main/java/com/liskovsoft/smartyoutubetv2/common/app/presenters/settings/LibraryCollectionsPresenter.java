@@ -2,6 +2,7 @@ package com.liskovsoft.smartyoutubetv2.common.app.presenters.settings;
 
 import android.content.Context;
 
+import com.liskovsoft.mediaserviceinterfaces.data.MediaItem;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
@@ -10,6 +11,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.LibraryCollections;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.LocalPlaylistStore;
 import com.liskovsoft.smartyoutubetv2.common.prefs.LibrarySettings;
 import com.liskovsoft.smartyoutubetv2.common.utils.SimpleEditDialog;
 
@@ -90,10 +92,34 @@ public class LibraryCollectionsPresenter extends BasePresenter<Void> {
         flags.add(UiOptionItem.from(str(R.string.collection_show_in_library),
                 o -> settings.setRowHidden(LibrarySettings.collectionKey(name), !o.isSelected()),
                 !settings.isRowHidden(LibrarySettings.collectionKey(name))));
+        flags.add(UiOptionItem.from(str(R.string.collection_pin),
+                o -> LibraryCollections.setPinned(getContext(), name, o.isSelected()),
+                LibraryCollections.isPinned(getContext(), name)));
         flags.add(UiOptionItem.from(str(R.string.collection_for_kids),
                 o -> LibraryCollections.setKids(getContext(), name, o.isSelected()),
                 LibraryCollections.isKids(getContext(), name)));
         dialog.appendCheckedCategory(name, flags);
+
+        List<OptionItem> sorts = new ArrayList<>();
+        int sort = LibraryCollections.getSort(getContext(), name);
+        sorts.add(UiOptionItem.from(str(R.string.collection_sort_manual), o -> LibraryCollections.setSort(getContext(), name, LibraryCollections.SORT_MANUAL), sort == LibraryCollections.SORT_MANUAL));
+        sorts.add(UiOptionItem.from(str(R.string.collection_sort_name), o -> LibraryCollections.setSort(getContext(), name, LibraryCollections.SORT_NAME), sort == LibraryCollections.SORT_NAME));
+        sorts.add(UiOptionItem.from(str(R.string.collection_sort_newest), o -> LibraryCollections.setSort(getContext(), name, LibraryCollections.SORT_NEWEST), sort == LibraryCollections.SORT_NEWEST));
+        dialog.appendRadioCategory(str(R.string.collection_sort), sorts);
+
+        dialog.appendSingleButton(UiOptionItem.from(str(R.string.collection_items), o -> showItems(name)));
+        dialog.appendSingleButton(UiOptionItem.from(str(R.string.collection_bulk_add), o -> showBulkAdd(name)));
+        dialog.appendSingleButton(UiOptionItem.from(str(R.string.collection_parent), o -> showParentPicker(name)));
+        dialog.appendSingleButton(UiOptionItem.from(str(R.string.collection_icon), o -> {
+            dialog.closeDialog();
+            SimpleEditDialog.show(getContext(), str(R.string.collection_icon), str(R.string.collection_icon_prompt),
+                    LibraryCollections.getIcon(getContext(), name), value -> {
+                        LibraryCollections.setIcon(getContext(), name, value);
+                        showOne(name);
+                        return true;
+                    });
+        }));
+        dialog.appendSingleButton(UiOptionItem.from(str(R.string.collection_cover), o -> showCoverPicker(name)));
 
         dialog.appendSingleButton(UiOptionItem.from(str(R.string.collection_move_up), o -> {
             LibraryCollections.move(getContext(), name, -1);
@@ -121,6 +147,123 @@ public class LibraryCollectionsPresenter extends BasePresenter<Void> {
         }));
 
         dialog.showDialog(name);
+    }
+
+    /** Items of one collection in stored order: reorder, move to another collection, remove. */
+    private void showItems(String name) {
+        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+        dialog.closeDialog();
+
+        List<MediaItem> items = LibraryCollections.itemsRaw(getContext(), name);
+        for (int i = 0; i < items.size(); i++) {
+            final int index = i;
+            String title = items.get(i).getTitle() != null ? items.get(i).getTitle() : "?";
+            dialog.appendSingleButton(UiOptionItem.from((i + 1) + ". " + title, o -> showItem(name, index)));
+        }
+
+        dialog.showDialog(name + "  \u2022  " + str(R.string.collection_items));
+    }
+
+    private void showItem(String name, int index) {
+        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+        dialog.closeDialog();
+
+        dialog.appendSingleButton(UiOptionItem.from(str(R.string.collection_move_up), o -> {
+            LibraryCollections.moveItem(getContext(), name, index, -1);
+            showItems(name);
+        }));
+        dialog.appendSingleButton(UiOptionItem.from(str(R.string.collection_move_down), o -> {
+            LibraryCollections.moveItem(getContext(), name, index, 1);
+            showItems(name);
+        }));
+        for (String other : LibraryCollections.names(getContext())) {
+            if (!other.equals(name)) {
+                dialog.appendSingleButton(UiOptionItem.from(str(R.string.collection_item_move_to) + " " + other, o -> {
+                    LibraryCollections.moveItemTo(getContext(), name, index, other);
+                    showItems(name);
+                }));
+            }
+        }
+        dialog.appendSingleButton(UiOptionItem.from(str(R.string.collection_item_remove), o -> {
+            LibraryCollections.removeAt(getContext(), name, index);
+            showItems(name);
+        }));
+
+        dialog.showDialog(name);
+    }
+
+    /** Tick many saved playlists/channels at once. */
+    private void showBulkAdd(String name) {
+        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+        dialog.closeDialog();
+
+        List<MediaItem> candidates = new ArrayList<>();
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        List<MediaItem> source = new ArrayList<>(LocalPlaylistStore.getAll(getContext()));
+        source.addAll(LocalPlaylistStore.getPinned(getContext()));
+        for (MediaItem item : source) {
+            String key = item.getPlaylistId() != null ? "p:" + item.getPlaylistId() : "c:" + item.getChannelId();
+            if (seen.add(key)) {
+                candidates.add(item);
+            }
+        }
+
+        if (candidates.isEmpty()) {
+            MessageHelpers.showMessage(getContext(), str(R.string.collection_bulk_empty));
+            showOne(name);
+            return;
+        }
+
+        List<OptionItem> options = new ArrayList<>();
+        for (MediaItem item : candidates) {
+            Video video = Video.from(item);
+            String title = item.getTitle() != null ? item.getTitle() : "?";
+            options.add(UiOptionItem.from(title, o -> {
+                if (o.isSelected()) {
+                    LibraryCollections.add(getContext(), name, video);
+                } else {
+                    LibraryCollections.remove(getContext(), name, video);
+                }
+            }, LibraryCollections.contains(getContext(), name, video)));
+        }
+        dialog.appendCheckedCategory(name + "  \u2022  " + str(R.string.collection_bulk_add), options);
+        dialog.showDialog(name, () -> showOne(name));
+    }
+
+    /** Put the collection inside another one (or back to the top level). */
+    private void showParentPicker(String name) {
+        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+        dialog.closeDialog();
+
+        String current = LibraryCollections.getParent(getContext(), name);
+        List<OptionItem> options = new ArrayList<>();
+        options.add(UiOptionItem.from(str(R.string.collection_parent_none), o -> LibraryCollections.setParent(getContext(), name, null), current == null));
+        for (String other : LibraryCollections.names(getContext())) {
+            if (!LibraryCollections.isInside(getContext(), other, name)) { // not itself, not its own sub-collections
+                options.add(UiOptionItem.from(other, o -> LibraryCollections.setParent(getContext(), name, other), other.equals(current)));
+            }
+        }
+        dialog.appendRadioCategory(str(R.string.collection_parent), options);
+        dialog.showDialog(name, () -> showOne(name));
+    }
+
+    /** Choose the cover picture: automatic (first item) or the picture of a chosen item. */
+    private void showCoverPicker(String name) {
+        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+        dialog.closeDialog();
+
+        String current = LibraryCollections.getCover(getContext(), name);
+        List<OptionItem> options = new ArrayList<>();
+        options.add(UiOptionItem.from(str(R.string.collection_cover_auto), o -> LibraryCollections.setCover(getContext(), name, null), current == null));
+        for (MediaItem item : LibraryCollections.itemsRaw(getContext(), name)) {
+            String url = item.getCardImageUrl();
+            if (url != null) {
+                String title = item.getTitle() != null ? item.getTitle() : "?";
+                options.add(UiOptionItem.from(title, o -> LibraryCollections.setCover(getContext(), name, url), url.equals(current)));
+            }
+        }
+        dialog.appendRadioCategory(str(R.string.collection_cover), options);
+        dialog.showDialog(name, () -> showOne(name));
     }
 
     private interface NameCallback {

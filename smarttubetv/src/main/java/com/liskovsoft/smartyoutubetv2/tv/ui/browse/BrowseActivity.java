@@ -33,4 +33,13 @@ public class BrowseActivity extends LeanbackActivity {
             setTheme(browseThemeResId);
         }
     }
+
+    @Override
+    public void onBackPressed() {
+        // Inside an opened library collection / search: step out first
+        if (com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter.instance(this).handleLibraryBack()) {
+            return;
+        }
+        super.onBackPressed();
+    }
 }
