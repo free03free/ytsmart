@@ -8,40 +8,60 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.SimpleMediaItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Local list of subscribed (saved) playlists.
- * Works without any account/network call, so "save playlist" and the library never depend on the server answer.
+ * Local library: playlists and channels the user added with "Add to library".
+ * Each entry is the card itself (Video.toString), so it opens exactly like the original card.
+ * Needs no account and no network.
  */
 public class LocalPlaylistStore {
     private static final String PREFS = "playlist_library";
-    private static final String KEY = "local_playlists";
+    private static final String KEY = "local_items_v2";
+
+    /** Stable identity of a card. */
+    public static String keyOf(Video v) {
+        if (v == null) {
+            return null;
+        }
+        if (v.playlistId != null) {
+            return "p:" + v.playlistId;
+        }
+        if (v.mediaItem != null && v.mediaItem.getPlaylistId() != null) {
+            return "p:" + v.mediaItem.getPlaylistId();
+        }
+        if (v.channelId != null && v.videoId == null) {
+            return "c:" + v.channelId;
+        }
+        if (v.reloadPageKey != null) {
+            return "r:" + v.reloadPageKey;
+        }
+        return "t:" + v.title;
+    }
 
     public static synchronized boolean add(Context context, Video video) {
-        if (context == null || video == null || video.playlistId == null) {
+        if (context == null || video == null) {
             return false;
         }
 
         try {
+            Video copy = Video.from(video);
+            if (copy.playlistId == null && video.mediaItem != null) {
+                copy.playlistId = video.mediaItem.getPlaylistId();
+            }
+            String key = keyOf(copy);
             JSONArray array = read(context);
 
             for (int i = 0; i < array.length(); i++) {
-                if (video.playlistId.equals(array.getJSONObject(i).optString("id"))) {
-                    return true; // already saved
+                Video old = Video.fromString(array.getString(i));
+                if (old != null && key.equals(keyOf(old))) {
+                    return true; // already there
                 }
             }
 
-            JSONObject obj = new JSONObject();
-            obj.put("id", video.playlistId);
-            obj.put("title", video.title != null ? video.title : "");
-            obj.put("image", video.cardImageUrl != null ? video.cardImageUrl : "");
-            obj.put("author", video.author != null ? video.author : "");
-            obj.put("channelId", video.channelId != null ? video.channelId : "");
-            array.put(obj);
+            array.put(copy.toString());
             write(context, array);
             return true;
         } catch (Exception e) {
@@ -49,16 +69,17 @@ public class LocalPlaylistStore {
         }
     }
 
-    public static synchronized boolean contains(Context context, String playlistId) {
-        if (context == null || playlistId == null) {
+    public static synchronized boolean contains(Context context, Video video) {
+        String key = keyOf(video);
+        if (context == null || key == null) {
             return false;
         }
 
         try {
             JSONArray array = read(context);
-
             for (int i = 0; i < array.length(); i++) {
-                if (playlistId.equals(array.getJSONObject(i).optString("id"))) {
+                Video old = Video.fromString(array.getString(i));
+                if (old != null && key.equals(keyOf(old))) {
                     return true;
                 }
             }
@@ -69,8 +90,9 @@ public class LocalPlaylistStore {
         return false;
     }
 
-    public static synchronized void remove(Context context, String playlistId) {
-        if (context == null || playlistId == null) {
+    public static synchronized void remove(Context context, Video video) {
+        String key = keyOf(video);
+        if (context == null || key == null) {
             return;
         }
 
@@ -79,8 +101,9 @@ public class LocalPlaylistStore {
             JSONArray result = new JSONArray();
 
             for (int i = 0; i < array.length(); i++) {
-                if (!playlistId.equals(array.getJSONObject(i).optString("id"))) {
-                    result.put(array.getJSONObject(i));
+                Video old = Video.fromString(array.getString(i));
+                if (old != null && !key.equals(keyOf(old))) {
+                    result.put(array.getString(i));
                 }
             }
 
@@ -90,6 +113,7 @@ public class LocalPlaylistStore {
         }
     }
 
+    /** Newest first. Unlike server shelves, these items are never filtered by type. */
     public static synchronized List<MediaItem> getAll(Context context) {
         List<MediaItem> result = new ArrayList<>();
 
@@ -100,8 +124,11 @@ public class LocalPlaylistStore {
         try {
             JSONArray array = read(context);
 
-            for (int i = array.length() - 1; i >= 0; i--) { // newest first
-                result.add(toItem(array.getJSONObject(i)));
+            for (int i = array.length() - 1; i >= 0; i--) {
+                Video video = Video.fromString(array.getString(i));
+                if (video != null) {
+                    result.add(SimpleMediaItem.from(video));
+                }
             }
         } catch (Exception e) {
             // NOP
@@ -110,7 +137,7 @@ public class LocalPlaylistStore {
         return result;
     }
 
-    /** Playlists the user pinned to the sidebar earlier. They count as subscriptions too. */
+    /** Playlists pinned to the sidebar earlier also count as saved. */
     public static List<MediaItem> getPinned(Context context) {
         List<MediaItem> result = new ArrayList<>();
 
@@ -127,21 +154,6 @@ public class LocalPlaylistStore {
         }
 
         return result;
-    }
-
-    private static MediaItem toItem(JSONObject obj) {
-        Video video = new Video();
-        video.itemType = MediaItem.TYPE_PLAYLIST;
-        video.playlistId = obj.optString("id");
-        video.title = obj.optString("title");
-        video.cardImageUrl = emptyToNull(obj.optString("image"));
-        video.author = emptyToNull(obj.optString("author"));
-        video.channelId = null; // a playlist card must open as a playlist, not as a channel
-        return SimpleMediaItem.from(video);
-    }
-
-    private static String emptyToNull(String s) {
-        return s == null || s.isEmpty() ? null : s;
     }
 
     private static JSONArray read(Context context) {

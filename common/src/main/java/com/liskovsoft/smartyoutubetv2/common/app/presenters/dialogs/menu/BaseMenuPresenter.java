@@ -186,6 +186,34 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
                 ));
     }
 
+    /**
+     * "Add to library" / "Remove from library". Always shown for playlist and channel cards,
+     * independent of menu settings, sign-in state and server answers.
+     */
+    protected void appendAddToLibraryButton() {
+        Video original = getVideo();
+
+        if (original == null || (original.hasVideo() && !original.hasPlaylist()) || original.getTitle() == null) {
+            return; // plain video
+        }
+
+        boolean saved = LocalPlaylistStore.contains(getContext(), original);
+
+        getDialogPresenter().appendSingleButton(
+                UiOptionItem.from(
+                        getContext().getString(saved ? R.string.remove_from_library : R.string.add_to_library),
+                        optionItem -> {
+                            if (saved) {
+                                LocalPlaylistStore.remove(getContext(), original);
+                                MessageHelpers.showMessage(getContext(), getContext().getString(R.string.removed_from_library));
+                            } else {
+                                LocalPlaylistStore.add(getContext(), original);
+                                MessageHelpers.showMessage(getContext(), getContext().getString(R.string.saved_to_library));
+                            }
+                            closeDialog();
+                        }));
+    }
+
     protected void appendSaveRemovePlaylistButton() {
         Video original = getVideo();
 
@@ -198,20 +226,6 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
         }
 
         if (original == null || (!original.hasPlaylist() && !original.isPlaylistAsChannel() && !original.belongsToUserPlaylists())) {
-            return;
-        }
-
-        String localId = original.playlistId != null ? original.playlistId : (original.mediaItem != null ? original.mediaItem.getPlaylistId() : null);
-        if (localId != null && LocalPlaylistStore.contains(getContext(), localId) && !original.belongsToUserPlaylists()) {
-            // Already subscribed locally: offer to unsubscribe
-            getDialogPresenter().appendSingleButton(
-                    UiOptionItem.from(
-                            getContext().getString(R.string.remove_from_library),
-                            optionItem -> {
-                                LocalPlaylistStore.remove(getContext(), localId);
-                                MessageHelpers.showMessage(getContext(), getContext().getString(R.string.removed_from_library));
-                                closeDialog();
-                            }));
             return;
         }
 
@@ -303,7 +317,7 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
     }
 
     private void removePlaylist(Video video) {
-        LocalPlaylistStore.remove(getContext(), video.playlistId);
+        LocalPlaylistStore.remove(getContext(), video);
         MediaItemService manager = YouTubeMediaItemService.instance();
         Observable<Void> action = manager.removePlaylistObserve(video.playlistId);
         RxHelper.execute(action,
@@ -319,12 +333,8 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
     }
 
     private void savePlaylist(Video video) {
-        String id = video.playlistId != null ? video.playlistId : (video.mediaItem != null ? video.mediaItem.getPlaylistId() : null);
-
         // Always keep a local copy first: the library works even if the account call fails
-        Video local = Video.from(video);
-        local.playlistId = id;
-        boolean savedLocally = LocalPlaylistStore.add(getContext(), local);
+        boolean savedLocally = LocalPlaylistStore.add(getContext(), video);
 
         MediaItemService manager = YouTubeMediaItemService.instance();
         Observable<Void> action = video.mediaItem != null && video.mediaItem.getPlaylistId() != null ? manager.savePlaylistObserve(video.mediaItem) : manager.savePlaylistObserve(video.playlistId);

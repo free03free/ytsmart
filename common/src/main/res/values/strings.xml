@@ -762,4 +762,5 @@
     <string name="saved_to_library">Saved to Playlist library</string>
     <string name="remove_from_library">Remove from Playlist library</string>
     <string name="removed_from_library">Removed from Playlist library</string>
+    <string name="add_to_library">Add to Playlist library</string>
 </resources>

@@ -35,9 +35,17 @@ public class PlaylistLibraryService {
         final Set<String> seen = new HashSet<>();
 
         // 1) Locally saved + sidebar-pinned playlists: instant, no network, never empty because of a server error
-        List<MediaItem> localAll = new ArrayList<>(LocalPlaylistStore.getAll(context));
-        localAll.addAll(LocalPlaylistStore.getPinned(context));
-        List<MediaItem> localItems = playlistsOnly(localAll, seen);
+        List<MediaItem> localItems = new ArrayList<>();
+        for (MediaItem item : LocalPlaylistStore.getAll(context)) { // saved cards: any type (playlist or channel)
+            if (seen.add(item.getPlaylistId() != null ? item.getPlaylistId() : item.getChannelId() + "|" + item.getTitle())) {
+                localItems.add(item);
+            }
+        }
+        for (MediaItem item : LocalPlaylistStore.getPinned(context)) {
+            if (seen.add(item.getPlaylistId())) {
+                localItems.add(item);
+            }
+        }
         Observable<List<MediaGroup>> local = localItems.isEmpty() ? Observable.<List<MediaGroup>>empty() :
                 Observable.<List<MediaGroup>>just(Collections.<MediaGroup>singletonList(
                         new LibraryGroup(null, context.getString(R.string.playlist_library_saved) + " (" + localItems.size() + ")", localItems)));

@@ -754,4 +754,5 @@
   <string name="saved_to_library">تم الحفظ في مكتبة القوائم</string>
   <string name="remove_from_library">إزالة من مكتبة القوائم</string>
   <string name="removed_from_library">تمت الإزالة من مكتبة القوائم</string>
+  <string name="add_to_library">إضافة إلى مكتبة القوائم</string>
 </resources>
