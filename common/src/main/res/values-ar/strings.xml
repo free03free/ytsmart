@@ -868,4 +868,7 @@
     <string name="collection_item_move_to">نقل إلى:</string>
     <string name="collection_item_remove">إزالة من المجموعة</string>
     <string name="collection_sub_count">%d مجموعات</string>
+    <string name="library_reorder">ترتيب عناصر الإعدادات</string>
+    <string name="library_reorder_done">تم</string>
+    <string name="library_kids_title">وضع الأطفال</string>
 </resources>

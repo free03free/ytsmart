@@ -52,7 +52,7 @@ public class AppDataSourceManager {
         settingItems.add(new SettingsItem(
                 context.getString(R.string.settings_main_ui), () -> MainUISettingsPresenter.instance(context).show(), R.drawable.settings_main_ui));
         settingItems.add(new SettingsItem(
-                context.getString(R.string.library_settings_title), () -> com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.LibrarySettingsPresenter.instance(context).show(), R.drawable.settings_main_ui));
+                context.getString(R.string.library_settings_title), () -> com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.LibrarySettingsPresenter.instance(context).show(), R.drawable.settings_library));
         settingItems.add(new SettingsItem(
                 context.getString(R.string.settings_player), () -> PlayerSettingsPresenter.instance(context).show(), R.drawable.settings_player));
         // Don't add afr support check here.

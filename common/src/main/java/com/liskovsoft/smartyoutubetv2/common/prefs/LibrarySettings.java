@@ -196,6 +196,10 @@ public class LibrarySettings {
     public boolean isCollectionsShown() { return mPrefs.getBoolean("show_collections", true); }
     public void setCollectionsShown(boolean v) { mPrefs.edit().putBoolean("show_collections", v).apply(); }
 
+    /** Order of the sections on the library settings screen (ids; unknown/missing ids are merged by the caller). */
+    public String getSettingsOrder() { return mPrefs.getString("settings_order", ""); }
+    public void setSettingsOrder(String csv) { mPrefs.edit().putString("settings_order", csv).apply(); }
+
     public void reset() {
         String local = mPrefs.getString("local_items_v2", "[]"); // keep the saved items, reset only the settings
         boolean added = mPrefs.getBoolean("added", false);

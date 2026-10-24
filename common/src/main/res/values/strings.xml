@@ -876,4 +876,7 @@
     <string name="collection_item_move_to">Move to:</string>
     <string name="collection_item_remove">Remove from collection</string>
     <string name="collection_sub_count">%d collections</string>
+    <string name="library_reorder">Reorder these settings</string>
+    <string name="library_reorder_done">Done</string>
+    <string name="library_kids_title">Kids mode</string>
 </resources>
