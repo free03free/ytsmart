@@ -34,21 +34,35 @@ public class PlaylistLibraryService {
         final String mineTitle = context.getString(R.string.playlist_library_mine);
         final Set<String> seen = new HashSet<>();
 
-        // 1) Locally saved + sidebar-pinned playlists: instant, no network, never empty because of a server error
-        List<MediaItem> localItems = new ArrayList<>();
-        for (MediaItem item : LocalPlaylistStore.getAll(context)) { // saved cards: any type (playlist or channel)
-            if (seen.add(item.getPlaylistId() != null ? item.getPlaylistId() : item.getChannelId() + "|" + item.getTitle())) {
-                localItems.add(item);
+        // 1) Saved by the user (local, instant, independent of the server): playlists and channels in separate shelves
+        List<MediaItem> savedPlaylists = new ArrayList<>();
+        List<MediaItem> savedChannels = new ArrayList<>();
+        for (MediaItem item : LocalPlaylistStore.getAll(context)) {
+            if (item.getPlaylistId() != null) {
+                if (seen.add(item.getPlaylistId())) {
+                    savedPlaylists.add(item);
+                }
+            } else if (item.getChannelId() != null) {
+                if (seen.add("c:" + item.getChannelId())) {
+                    savedChannels.add(item);
+                }
             }
         }
         for (MediaItem item : LocalPlaylistStore.getPinned(context)) {
             if (seen.add(item.getPlaylistId())) {
-                localItems.add(item);
+                savedPlaylists.add(item);
             }
         }
-        Observable<List<MediaGroup>> local = localItems.isEmpty() ? Observable.<List<MediaGroup>>empty() :
-                Observable.<List<MediaGroup>>just(Collections.<MediaGroup>singletonList(
-                        new LibraryGroup(null, context.getString(R.string.playlist_library_saved) + " (" + localItems.size() + ")", localItems)));
+
+        List<MediaGroup> localShelves = new ArrayList<>();
+        if (!savedPlaylists.isEmpty()) {
+            localShelves.add(new LibraryGroup(null, context.getString(R.string.playlist_library_saved) + " (" + savedPlaylists.size() + ")", savedPlaylists));
+        }
+        if (!savedChannels.isEmpty()) {
+            localShelves.add(new LibraryGroup(null, context.getString(R.string.playlist_library_channels) + " (" + savedChannels.size() + ")", savedChannels));
+        }
+        Observable<List<MediaGroup>> local = localShelves.isEmpty() ? Observable.<List<MediaGroup>>empty() :
+                Observable.<List<MediaGroup>>just(localShelves);
 
         // 2) Account playlists (created + saved on YouTube). Errors must not kill the other shelves.
         Observable<List<MediaGroup>> mine = contentService.getPlaylistsObserve()
@@ -61,7 +75,11 @@ public class PlaylistLibraryService {
                 })
                 .onErrorResumeNext(Observable.<List<MediaGroup>>empty());
 
-        // 3) Playlists published by subscribed channels
+        // 3) One shelf per saved channel (Netflix-like): its playlists, or its latest content when it has no playlists
+        Observable<List<MediaGroup>> savedChannelShelves = Observable.fromIterable(savedChannels)
+                .concatMap(channel -> channelShelfObserve(contentService, channel, seen));
+
+        // 4) One shelf per subscribed channel
         Observable<List<MediaGroup>> fromChannels = contentService.getSubscribedChannelsByLastViewedObserve()
                 .flatMap(channels -> {
                     List<MediaItem> list = channels.getMediaItems();
@@ -71,12 +89,17 @@ public class PlaylistLibraryService {
                     }
                     return Observable.<MediaItem>fromIterable(limited);
                 })
-                .concatMap(channel -> contentService.getChannelObserve(channel)
-                        .map(groups -> channelShelf(channel, groups, seen))
-                        .onErrorResumeNext(Observable.<List<MediaGroup>>empty()))
+                .concatMap(channel -> channelShelfObserve(contentService, channel, seen))
                 .onErrorResumeNext(Observable.<List<MediaGroup>>empty());
 
-        return Observable.concat(local, mine, fromChannels);
+        // Fast shelves first, slow network shelves after
+        return Observable.concat(local, mine, savedChannelShelves, fromChannels);
+    }
+
+    private static Observable<List<MediaGroup>> channelShelfObserve(ContentService contentService, MediaItem channel, Set<String> seen) {
+        return contentService.getChannelObserve(channel)
+                .map(groups -> channelShelf(channel, groups, seen))
+                .onErrorResumeNext(Observable.<List<MediaGroup>>empty());
     }
 
     private static List<MediaGroup> channelShelf(MediaItem channel, List<MediaGroup> groups, Set<String> seen) {
@@ -99,6 +122,16 @@ public class PlaylistLibraryService {
         }
 
         if (all.isEmpty() || first == null) {
+            // No playlists published: show the channel's own first non-empty shelf (latest videos)
+            if (groups != null) {
+                for (MediaGroup group : groups) {
+                    if (group != null && group.getMediaItems() != null && !group.getMediaItems().isEmpty()) {
+                        List<MediaItem> items = group.getMediaItems();
+                        List<MediaItem> limited = new ArrayList<>(items.subList(0, Math.min(20, items.size())));
+                        return Collections.<MediaGroup>singletonList(new LibraryGroup(group, channel.getTitle() + " (" + limited.size() + ")", limited));
+                    }
+                }
+            }
             return Collections.emptyList();
         }
 
