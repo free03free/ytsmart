@@ -99,6 +99,9 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
     private boolean mIsCardTextAutoScrollEnabled;
     private int mCardTitleLinesNum;
     private float mUIScale;
+    private float mRowTitleScale;
+    private int mRowTitleColor;
+    private boolean mIsRowTitleBold;
     private float mVideoGridScale;
     private final List<ColorScheme> mColorSchemes = new ArrayList<>();
     private int mColorSchemeIndex;
@@ -193,6 +196,33 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
 
     public float getUIScale() {
         return mUIScale;
+    }
+
+    public float getRowTitleScale() {
+        return mRowTitleScale;
+    }
+
+    public void setRowTitleScale(float scale) {
+        mRowTitleScale = scale;
+        persistState();
+    }
+
+    public int getRowTitleColor() {
+        return mRowTitleColor;
+    }
+
+    public void setRowTitleColor(int color) {
+        mRowTitleColor = color;
+        persistState();
+    }
+
+    public boolean isRowTitleBold() {
+        return mIsRowTitleBold;
+    }
+
+    public void setRowTitleBold(boolean bold) {
+        mIsRowTitleBold = bold;
+        persistState();
     }
 
     public void setUIScale(float scale) {
@@ -536,6 +566,9 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
         mCardPreviewType = Helpers.parseInt(split, 21, CARD_PREVIEW_DISABLED);
         mIsUnlocalizedTitlesEnabled = Helpers.parseBoolean(split, 22, false);
         mUiTweaks = Helpers.parseLong(split, 23, UI_TWEAK_DEFAULT);
+        mRowTitleScale = Helpers.parseFloat(split, 24, 1.3f);
+        mRowTitleColor = Helpers.parseInt(split, 25, 0);
+        mIsRowTitleBold = Helpers.parseBoolean(split, 26, true);
 
         int idx = -1;
         for (Long menuItem : MENU_ITEM_DEFAULT_ORDER) {
@@ -583,7 +616,8 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
                 mIsUploadsOldLookEnabled, mIsUploadsAutoLoadEnabled, mCardTextScrollSpeed, mMenuItems, mTopButtons,
                 null, mThumbQuality, mIsCardMultilineSubtitleEnabled, Helpers.mergeList(mMenuItemsOrdered),
                 mIsChannelsFilterEnabled, mIsChannelSearchBarEnabled, mIsPinnedChannelRowsEnabled, mCardPreviewType,
-                mIsUnlocalizedTitlesEnabled, mUiTweaks));
+                mIsUnlocalizedTitlesEnabled, mUiTweaks,
+                mRowTitleScale, mRowTitleColor, mIsRowTitleBold));
     }
 
     public static class ColorScheme {

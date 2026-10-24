@@ -51,7 +51,7 @@ public class VideoCardPresenter extends LongClickPresenter {
         mDefaultBackgroundColor =
             ContextCompat.getColor(context, Helpers.getThemeAttr(context, R.attr.cardDefaultBackground));
         mDefaultTextColor =
-                ContextCompat.getColor(context, R.color.card_default_text);
+                ViewUtil.isLightColor(mDefaultBackgroundColor) ? 0xFF212121 : ContextCompat.getColor(context, R.color.card_default_text);
         mSelectedBackgroundColor =
                 ContextCompat.getColor(context, Helpers.getThemeAttr(context, R.attr.cardSelectedBackground));
         mSelectedTextColor =

@@ -79,9 +79,19 @@ public class IconHeaderItemPresenter extends RowHeaderPresenter {
             }
         }
 
+        boolean lightSidebar = ViewUtil.isLightColor(
+                ViewUtil.getThemeColor(rootView.getContext(), R.attr.brandColor));
+
+        if (lightSidebar && iconView != null && mIconUrl == null) {
+            iconView.setColorFilter(0xFF424242, android.graphics.PorterDuff.Mode.SRC_IN);
+        }
+
         TextView label = rootView.findViewById(R.id.header_label);
         if (label != null) {
             label.setText(headerItem.getName());
+            if (lightSidebar) {
+                label.setTextColor(0xFF212121);
+            }
         }
     }
 

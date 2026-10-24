@@ -69,11 +69,28 @@ public class PlaylistLibraryService {
         }
 
         List<MediaGroup> localShelves = new ArrayList<>();
-        if (settings.isSavedPlaylistsShown() && !savedPlaylists.isEmpty()) {
+        if (!settings.isKidsMode() && settings.isSavedPlaylistsShown() && !savedPlaylists.isEmpty()) {
             localShelves.add(new LibraryGroup(null, title(settings, "\u2B50 ", context.getString(R.string.playlist_library_saved), savedPlaylists.size()), savedPlaylists));
         }
-        if (settings.isSavedChannelsShown() && !savedChannels.isEmpty()) {
+        if (!settings.isKidsMode() && settings.isSavedChannelsShown() && !savedChannels.isEmpty()) {
             localShelves.add(new LibraryGroup(null, title(settings, "\uD83D\uDCFA ", context.getString(R.string.playlist_library_channels), savedChannels.size()), savedChannels));
+        }
+        if (settings.isCollectionsShown() || settings.isKidsMode()) {
+            for (String name : LibraryCollections.names(context)) {
+                if (settings.isKidsMode() && !LibraryCollections.isKids(context, name)) {
+                    continue; // kids mode: only collections marked "for kids"
+                }
+                if (settings.isRowHidden(LibrarySettings.collectionKey(name))) {
+                    continue;
+                }
+                List<MediaItem> items = LibraryCollections.items(context, name);
+                if (!items.isEmpty()) {
+                    localShelves.add(new LibraryGroup(null, title(settings, "\uD83D\uDCC2 ", name, items.size()), items));
+                }
+            }
+        }
+        if (settings.isKidsMode()) {
+            return localShelves.isEmpty() ? Observable.<List<MediaGroup>>empty() : Observable.<List<MediaGroup>>just(localShelves);
         }
         Observable<List<MediaGroup>> local = localShelves.isEmpty() ? Observable.<List<MediaGroup>>empty() :
                 Observable.<List<MediaGroup>>just(localShelves);
@@ -140,11 +157,33 @@ public class PlaylistLibraryService {
                 .toObservable()
                 .map(sources -> networkShelves(settings, context, sources, seen));
 
+        // "Continue watching": videos started but not finished (from the watch history)
+        Observable<List<MediaGroup>> keepWatching = !settings.isContinueShown() ? Observable.<List<MediaGroup>>empty() :
+                contentService.getHistoryObserve()
+                .map(group -> {
+                    List<MediaItem> items = new ArrayList<>();
+                    if (group != null && group.getMediaItems() != null) {
+                        for (MediaItem item : group.getMediaItems()) {
+                            if (item != null && item.getVideoId() != null && item.getPercentWatched() >= 3 && item.getPercentWatched() < 95) {
+                                items.add(item);
+                                if (items.size() >= settings.getItemsPerShelf()) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (items.isEmpty()) {
+                        return Collections.<MediaGroup>emptyList();
+                    }
+                    return Collections.<MediaGroup>singletonList(new LibraryGroup(group, title(settings, "\u25B6\uFE0F ", context.getString(R.string.playlist_library_continue), items.size()), items));
+                })
+                .onErrorResumeNext(Observable.<List<MediaGroup>>empty());
+
         // Fast shelves first, slow network shelves after
         if (settings.getOrder() == LibrarySettings.ORDER_ACCOUNT_FIRST) {
-            return Observable.concat(mine, local, network);
+            return Observable.concat(mine, local, keepWatching, network);
         }
-        return Observable.concat(local, mine, network);
+        return Observable.concat(local, keepWatching, mine, network);
     }
 
     private static List<MediaGroup> networkShelves(LibrarySettings settings, Context context, List<Source> sources, Set<String> seen) {
@@ -178,14 +217,25 @@ public class PlaylistLibraryService {
 
         // One shelf per source (Netflix-like)
         for (Source source : sources) {
-            if (!source.showShelf) {
+            String rowKey = LibrarySettings.rowKey(source.item);
+            settings.cacheName(rowKey, nameOf(context, source.item, source.groups)); // so the "rows" manager can show real names
+            if (!source.showShelf || settings.isRowHidden(rowKey)) {
                 continue;
             }
             String key = source.item.getChannelId() != null ? source.item.getChannelId() : source.item.getTitle();
             if (key != null && !channelsDone.add(key)) {
                 continue; // same channel saved and subscribed
             }
-            result.addAll(channelShelf(settings, context, source.item, source.groups, seen));
+            // "New" badge: the newest video differs from the one seen when the library was opened last time
+            boolean isNew = false;
+            List<MediaItem> top = firstVideos(source.groups, 1);
+            if (!top.isEmpty() && top.get(0).getVideoId() != null) {
+                String seenId = settings.getSeenTop(rowKey);
+                isNew = seenId != null && !seenId.equals(top.get(0).getVideoId());
+                settings.setSeenTop(rowKey, top.get(0).getVideoId());
+            }
+
+            result.addAll(channelShelf(settings, context, source.item, source.groups, seen, isNew));
         }
 
         return result;
@@ -247,10 +297,10 @@ public class PlaylistLibraryService {
         return context.getString(R.string.playlist_library_channel_fallback);
     }
 
-    private static List<MediaGroup> channelShelf(LibrarySettings settings, Context context, MediaItem channel, List<MediaGroup> groups, Set<String> seen) {
+    private static List<MediaGroup> channelShelf(LibrarySettings settings, Context context, MediaItem channel, List<MediaGroup> groups, Set<String> seen, boolean isNew) {
         final int mode = settings.getChannelContent();
         final int limit = settings.getItemsPerShelf();
-        final String name = nameOf(context, channel, groups);
+        final String name = (isNew ? "\uD83C\uDD95 " : "") + nameOf(context, channel, groups);
 
         if (groups == null) {
             return Collections.emptyList();

@@ -13,6 +13,11 @@ public class BrowseActivity extends LeanbackActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // User defined style of row titles
+        MainUIData uiData = MainUIData.instance(this);
+        androidx.leanback.widget.RowHeaderPresenter.sTitleScale = uiData.getRowTitleScale();
+        androidx.leanback.widget.RowHeaderPresenter.sTitleColor = uiData.getRowTitleColor();
+        androidx.leanback.widget.RowHeaderPresenter.sTitleBold = uiData.isRowTitleBold();
         try {
             setContentView(R.layout.fragment_main);
         } catch (NoClassDefFoundError e) {

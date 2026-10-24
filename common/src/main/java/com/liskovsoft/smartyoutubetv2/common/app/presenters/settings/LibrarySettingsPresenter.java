@@ -8,7 +8,12 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
+import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.LibraryCollections;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.PlaylistLibraryService;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.SidebarService;
 import com.liskovsoft.smartyoutubetv2.common.prefs.LibrarySettings;
+import com.liskovsoft.smartyoutubetv2.common.utils.SimpleEditDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +31,22 @@ public class LibrarySettingsPresenter extends BasePresenter<Void> {
     }
 
     public void show() {
+        if (mSettings.isKidsMode() && mSettings.getPin() != null) {
+            SimpleEditDialog.showPassword(getContext(), str(R.string.library_kids_enter_pin), null, value -> {
+                if (mSettings.getPin().equals(value)) {
+                    showSettings();
+                } else {
+                    MessageHelpers.showMessage(getContext(), str(R.string.library_kids_wrong_pin));
+                }
+                return true;
+            });
+            return;
+        }
+
+        showSettings();
+    }
+
+    private void showSettings() {
         AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
 
         // 1) Which shelves to show
@@ -35,6 +56,8 @@ public class LibrarySettingsPresenter extends BasePresenter<Void> {
         shelves.add(UiOptionItem.from(str(R.string.library_opt_mine), o -> mSettings.setMyPlaylistsShown(o.isSelected()), mSettings.isMyPlaylistsShown()));
         shelves.add(UiOptionItem.from(str(R.string.library_opt_saved_channel_shelves), o -> mSettings.setSavedChannelShelvesShown(o.isSelected()), mSettings.isSavedChannelShelvesShown()));
         shelves.add(UiOptionItem.from(str(R.string.library_opt_subscribed_shelves), o -> mSettings.setSubscribedShelvesShown(o.isSelected()), mSettings.isSubscribedShelvesShown()));
+        shelves.add(0, UiOptionItem.from(str(R.string.library_opt_continue), o -> mSettings.setContinueShown(o.isSelected()), mSettings.isContinueShown()));
+        shelves.add(0, UiOptionItem.from(str(R.string.library_opt_collections), o -> mSettings.setCollectionsShown(o.isSelected()), mSettings.isCollectionsShown()));
         shelves.add(0, UiOptionItem.from(str(R.string.library_opt_latest), o -> mSettings.setLatestShown(o.isSelected()), mSettings.isLatestShown()));
         dialog.appendCheckedCategory(str(R.string.library_cat_shelves), shelves);
 
@@ -43,6 +66,10 @@ public class LibrarySettingsPresenter extends BasePresenter<Void> {
         details.add(UiOptionItem.from(str(R.string.library_opt_hide_system), o -> mSettings.setSystemListsHidden(o.isSelected()), mSettings.isSystemListsHidden()));
         details.add(UiOptionItem.from(str(R.string.library_opt_show_count), o -> mSettings.setCountShown(o.isSelected()), mSettings.isCountShown()));
         details.add(UiOptionItem.from(str(R.string.library_opt_icons), o -> mSettings.setIconsShown(o.isSelected()), mSettings.isIconsShown()));
+        SidebarService sidebar = SidebarService.instance(getContext());
+        details.add(UiOptionItem.from(str(R.string.library_opt_boot),
+                o -> sidebar.setBootSectionId(o.isSelected() ? PlaylistLibraryService.SECTION_ID : MediaGroup.TYPE_HOME),
+                sidebar.getBootSectionId() == PlaylistLibraryService.SECTION_ID));
         dialog.appendCheckedCategory(str(R.string.library_cat_details), details);
 
         // 3) Order
@@ -83,7 +110,27 @@ public class LibrarySettingsPresenter extends BasePresenter<Void> {
         }
         dialog.appendRadioCategory(str(R.string.library_cat_latest_per_source), latestPer);
 
-        // 6) Reset
+        // 6) Collections
+        dialog.appendSingleButton(UiOptionItem.from(str(R.string.collection_manage), o -> {
+            dialog.closeDialog();
+            LibraryCollectionsPresenter.instance(getContext()).showManage();
+        }));
+
+        // 7) Show / hide individual rows
+        dialog.appendSingleButton(UiOptionItem.from(str(R.string.library_rows_manage), o -> {
+            dialog.closeDialog();
+            LibraryRowsPresenter.instance(getContext()).show();
+        }));
+
+        // 8) Kids mode
+        dialog.appendSingleButton(UiOptionItem.from(
+                str(mSettings.isKidsMode() ? R.string.library_kids_disable : R.string.library_kids_enable),
+                o -> {
+                    dialog.closeDialog();
+                    toggleKidsMode();
+                }));
+
+        // 9) Reset
         dialog.appendSingleButton(UiOptionItem.from(str(R.string.library_reset), o -> {
             mSettings.reset();
             MessageHelpers.showMessage(getContext(), str(R.string.library_reset_done));
@@ -91,6 +138,42 @@ public class LibrarySettingsPresenter extends BasePresenter<Void> {
         }));
 
         dialog.showDialog(str(R.string.library_settings_title), () -> MessageHelpers.showMessage(getContext(), str(R.string.library_reopen_hint)));
+    }
+
+    private void toggleKidsMode() {
+        if (mSettings.isKidsMode()) {
+            SimpleEditDialog.showPassword(getContext(), str(R.string.library_kids_enter_pin), null, value -> {
+                if (mSettings.getPin() == null || mSettings.getPin().equals(value)) {
+                    mSettings.setKidsMode(false);
+                    MessageHelpers.showMessage(getContext(), str(R.string.library_kids_off));
+                } else {
+                    MessageHelpers.showMessage(getContext(), str(R.string.library_kids_wrong_pin));
+                }
+                return true;
+            });
+            return;
+        }
+
+        boolean hasKidsCollection = false;
+        for (String name : LibraryCollections.names(getContext())) {
+            if (LibraryCollections.isKids(getContext(), name)) {
+                hasKidsCollection = true;
+            }
+        }
+        if (!hasKidsCollection) {
+            MessageHelpers.showLongMessage(getContext(), str(R.string.library_kids_no_collection));
+            return;
+        }
+
+        SimpleEditDialog.showPassword(getContext(), str(R.string.library_kids_set_pin), null, value -> {
+            if (value == null || value.trim().isEmpty()) {
+                return false;
+            }
+            mSettings.setPin(value.trim());
+            mSettings.setKidsMode(true);
+            MessageHelpers.showMessage(getContext(), str(R.string.library_kids_on));
+            return true;
+        });
     }
 
     private String str(int id) {

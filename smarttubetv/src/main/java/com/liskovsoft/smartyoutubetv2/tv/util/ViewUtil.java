@@ -29,6 +29,25 @@ import com.liskovsoft.smartyoutubetv2.tv.ui.widgets.marqueetextviewcompat.Marque
 import com.liskovsoft.smartyoutubetv2.tv.ui.widgets.speedmarquee.SpeedMarquee;
 
 public class ViewUtil {
+    /** True when the color is light enough to need dark text on top of it. */
+    public static boolean isLightColor(int color) {
+        double r = ((color >> 16) & 0xFF) / 255.0;
+        double g = ((color >> 8) & 0xFF) / 255.0;
+        double b = (color & 0xFF) / 255.0;
+        return (0.299 * r + 0.587 * g + 0.114 * b) > 0.6;
+    }
+
+    /** Resolves a color attribute of the current theme (0 if missing). */
+    public static int getThemeColor(Context context, int attrId) {
+        android.util.TypedValue tv = new android.util.TypedValue();
+        if (context.getTheme().resolveAttribute(attrId, tv, true)
+                && tv.type >= android.util.TypedValue.TYPE_FIRST_COLOR_INT
+                && tv.type <= android.util.TypedValue.TYPE_LAST_COLOR_INT) {
+            return tv.data;
+        }
+        return 0;
+    }
+
     /**
      * Focused card zoom factor
      */

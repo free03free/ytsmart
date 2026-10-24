@@ -183,6 +183,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
 
         appendReturnToBackgroundVideoButton();
         appendAddToLibraryButton();
+        appendAddToCollectionButton();
 
         for (Long menuItem : MainUIData.instance(getContext()).getMenuItemsOrdered()) {
             MenuAction menuAction = mMenuMapping.get(menuItem);
@@ -205,6 +206,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
 
         appendReturnToBackgroundVideoButton();
         appendAddToLibraryButton();
+        appendAddToCollectionButton();
 
         for (Long menuItem : MainUIData.instance(getContext()).getMenuItemsOrdered()) {
             MenuAction menuAction = mMenuMapping.get(menuItem);

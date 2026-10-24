@@ -33,6 +33,11 @@ import androidx.leanback.R;
  */
 public class RowHeaderPresenter extends Presenter {
 
+    // MOD: user controlled style of row titles (set from app settings)
+    public static float sTitleScale = 1f;
+    public static int sTitleColor = 0; // 0 = theme default
+    public static boolean sTitleBold = false;
+
     private final int mLayoutResourceId;
     private final Paint mFontMeasurePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private boolean mNullItemVisibilityGone;
@@ -86,6 +91,7 @@ public class RowHeaderPresenter extends Presenter {
         float mUnselectAlpha;
         RowHeaderView mTitleView;
         TextView mDescriptionView;
+        float mOriginalTextSize;
 
         /**
          * Creating a new ViewHolder that supports title and description.
@@ -113,6 +119,7 @@ public class RowHeaderPresenter extends Presenter {
         void initColors() {
             if (mTitleView != null) {
                 mOriginalTextColor = mTitleView.getCurrentTextColor();
+                mOriginalTextSize = mTitleView.getTextSize();
             }
 
             mUnselectAlpha = view.getResources().getFraction(
@@ -159,6 +166,7 @@ public class RowHeaderPresenter extends Presenter {
                 String name = headerItem.getName();
                 vh.mTitleView.setText(name);
                 vh.mTitleView.setVisibility(name != null ? View.VISIBLE : View.GONE);
+                applyTitleStyle(vh);
             }
             if (vh.mDescriptionView != null) {
                 if (TextUtils.isEmpty(headerItem.getDescription())) {
@@ -170,6 +178,20 @@ public class RowHeaderPresenter extends Presenter {
             }
             viewHolder.view.setContentDescription(headerItem.getContentDescription());
             viewHolder.view.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void applyTitleStyle(ViewHolder vh) {
+        // Only plain row titles; subclasses (side menu) keep their own look
+        if (getClass() != RowHeaderPresenter.class || vh.mTitleView == null || vh.mOriginalTextSize <= 0) {
+            return;
+        }
+        vh.mTitleView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, vh.mOriginalTextSize * sTitleScale);
+        vh.mTitleView.setTypeface(null, sTitleBold ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+        if (sTitleColor != 0) {
+            vh.mTitleView.setTextColor(sTitleColor);
+        } else {
+            vh.mTitleView.setTextColor(vh.mOriginalTextColor);
         }
     }
 

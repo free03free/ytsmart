@@ -60,6 +60,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         appendChannelSortingCategory(settingsPresenter);
         //appendPlaylistsCategoryStyle(settingsPresenter);
         appendScaleUI(settingsPresenter);
+        appendRowTitleStyle(settingsPresenter);
         if (Build.VERSION.SDK_INT > 19) {
             appendVideoGridScale(settingsPresenter);
         }
@@ -235,6 +236,45 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         }
 
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.scale_ui), options);
+    }
+
+    private void appendRowTitleStyle(AppDialogPresenter settingsPresenter) {
+        // size
+        List<OptionItem> sizes = new ArrayList<>();
+        for (float scale : new float[] {0.8f, 1.0f, 1.2f, 1.3f, 1.4f, 1.6f, 1.8f, 2.0f}) {
+            sizes.add(UiOptionItem.from(String.format("%sx", Helpers.formatFloat(scale)),
+                    optionItem -> {
+                        mMainUIData.setRowTitleScale(scale);
+                        mRestartApp = true;
+                    },
+                    Helpers.floatEquals(scale, mMainUIData.getRowTitleScale())));
+        }
+        settingsPresenter.appendRadioCategory(getContext().getString(R.string.row_title_size), sizes);
+
+        // color
+        List<OptionItem> colors = new ArrayList<>();
+        int[] values = {0, 0xFFFFFFFF, 0xFFFFD54F, 0xFFFF9800, 0xFFFF5252, 0xFF4FC3F7, 0xFF69F0AE, 0xFFFF80AB, 0xFF212121};
+        int[] names = {R.string.row_title_color_auto, R.string.row_title_color_white, R.string.row_title_color_yellow,
+                R.string.row_title_color_orange, R.string.row_title_color_red, R.string.row_title_color_blue,
+                R.string.row_title_color_green, R.string.row_title_color_pink, R.string.row_title_color_black};
+        for (int i = 0; i < values.length; i++) {
+            final int color = values[i];
+            colors.add(UiOptionItem.from(getContext().getString(names[i]),
+                    optionItem -> {
+                        mMainUIData.setRowTitleColor(color);
+                        mRestartApp = true;
+                    },
+                    color == mMainUIData.getRowTitleColor()));
+        }
+        settingsPresenter.appendRadioCategory(getContext().getString(R.string.row_title_color), colors);
+
+        // bold
+        settingsPresenter.appendSingleSwitch(UiOptionItem.from(getContext().getString(R.string.row_title_bold),
+                optionItem -> {
+                    mMainUIData.setRowTitleBold(optionItem.isSelected());
+                    mRestartApp = true;
+                },
+                mMainUIData.isRowTitleBold()));
     }
 
     private void appendCardTextScrollSpeed(AppDialogPresenter settingsPresenter) {

@@ -3,6 +3,11 @@ package com.liskovsoft.smartyoutubetv2.common.prefs;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.liskovsoft.mediaserviceinterfaces.data.MediaItem;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 /** User settings of the "Playlist library" section. Read on every refresh, so changes apply next time the section opens. */
 public class LibrarySettings {
     public static final int CHANNEL_CONTENT_PLAYLISTS = 0;       // playlists only
@@ -70,9 +75,136 @@ public class LibrarySettings {
     public boolean isIconsShown() { return mPrefs.getBoolean("show_icons", true); }
     public void setIconsShown(boolean v) { mPrefs.edit().putBoolean("show_icons", v).apply(); }
 
+    /** Stable key of a channel/playlist, used for hiding rows and remembering names. */
+    public static String rowKey(MediaItem item) {
+        if (item == null) {
+            return null;
+        }
+        if (item.getPlaylistId() != null) {
+            return "p:" + item.getPlaylistId();
+        }
+        if (item.getChannelId() != null) {
+            return "c:" + item.getChannelId();
+        }
+        return item.getTitle() != null ? "t:" + item.getTitle() : null;
+    }
+
+    public static String collectionKey(String name) {
+        return "col:" + name;
+    }
+
+    // ----- hidden rows -----
+    public boolean isRowHidden(String key) {
+        if (key == null) {
+            return false;
+        }
+        try {
+            JSONArray array = new JSONArray(mPrefs.getString("hidden_rows", "[]"));
+            for (int i = 0; i < array.length(); i++) {
+                if (key.equals(array.getString(i))) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            // NOP
+        }
+        return false;
+    }
+
+    public void setRowHidden(String key, boolean hidden) {
+        if (key == null) {
+            return;
+        }
+        try {
+            JSONArray array = new JSONArray(mPrefs.getString("hidden_rows", "[]"));
+            JSONArray result = new JSONArray();
+            for (int i = 0; i < array.length(); i++) {
+                if (!key.equals(array.getString(i))) {
+                    result.put(array.getString(i));
+                }
+            }
+            if (hidden) {
+                result.put(key);
+            }
+            mPrefs.edit().putString("hidden_rows", result.toString()).apply();
+        } catch (Exception e) {
+            // NOP
+        }
+    }
+
+    // ----- remembered names (subscription items often come without a title) -----
+    public void cacheName(String key, String name) {
+        if (key == null || name == null || name.isEmpty()) {
+            return;
+        }
+        try {
+            JSONObject obj = new JSONObject(mPrefs.getString("names_v1", "{}"));
+            if (!name.equals(obj.optString(key))) {
+                obj.put(key, name);
+                mPrefs.edit().putString("names_v1", obj.toString()).apply();
+            }
+        } catch (Exception e) {
+            // NOP
+        }
+    }
+
+    public String getCachedName(String key) {
+        try {
+            String name = new JSONObject(mPrefs.getString("names_v1", "{}")).optString(key);
+            return name == null || name.isEmpty() ? null : name;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // ----- "new" badge: newest video id seen the last time the library was opened -----
+    public String getSeenTop(String key) {
+        try {
+            String id = new JSONObject(mPrefs.getString("seen_top_v1", "{}")).optString(key);
+            return id == null || id.isEmpty() ? null : id;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public void setSeenTop(String key, String videoId) {
+        if (key == null || videoId == null) {
+            return;
+        }
+        try {
+            JSONObject obj = new JSONObject(mPrefs.getString("seen_top_v1", "{}"));
+            if (!videoId.equals(obj.optString(key))) {
+                obj.put(key, videoId);
+                mPrefs.edit().putString("seen_top_v1", obj.toString()).apply();
+            }
+        } catch (Exception e) {
+            // NOP
+        }
+    }
+
+    // ----- continue watching -----
+    public boolean isContinueShown() { return mPrefs.getBoolean("show_continue", true); }
+    public void setContinueShown(boolean v) { mPrefs.edit().putBoolean("show_continue", v).apply(); }
+
+    // ----- kids mode (PIN protected) -----
+    public boolean isKidsMode() { return mPrefs.getBoolean("kids_mode", false); }
+    public void setKidsMode(boolean v) { mPrefs.edit().putBoolean("kids_mode", v).apply(); }
+
+    public String getPin() { return mPrefs.getString("pin", null); }
+    public void setPin(String pin) { mPrefs.edit().putString("pin", pin).apply(); }
+
+    public boolean isCollectionsShown() { return mPrefs.getBoolean("show_collections", true); }
+    public void setCollectionsShown(boolean v) { mPrefs.edit().putBoolean("show_collections", v).apply(); }
+
     public void reset() {
         String local = mPrefs.getString("local_items_v2", "[]"); // keep the saved items, reset only the settings
         boolean added = mPrefs.getBoolean("added", false);
-        mPrefs.edit().clear().putString("local_items_v2", local).putBoolean("added", added).apply();
+        String collections = mPrefs.getString("collections_v1", "[]");
+        String names = mPrefs.getString("names_v1", "{}");
+        String seenTop = mPrefs.getString("seen_top_v1", "{}");
+        boolean kids = mPrefs.getBoolean("kids_mode", false); // a reset must not switch kids mode off
+        String pin = mPrefs.getString("pin", null);
+        mPrefs.edit().clear().putString("local_items_v2", local).putString("collections_v1", collections)
+                .putString("names_v1", names).putString("seen_top_v1", seenTop).putBoolean("kids_mode", kids).putString("pin", pin).putBoolean("added", added).apply();
     }
 }

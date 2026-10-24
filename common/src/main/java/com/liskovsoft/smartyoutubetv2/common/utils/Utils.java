@@ -120,6 +120,7 @@ public class Utils {
             "yt_service_prefs.xml",
             "com.liskovsoft.appupdatechecker2.preferences.xml",
             "com.liskovsoft.sharedutils.prefs.GlobalPreferences.xml",
+            "playlist_library.xml", // Playlist library: saved items, collections, settings
             "_preferences.xml" // before _ should be the app package name
     };
     public static final String[] BACKUP_DIRS = {

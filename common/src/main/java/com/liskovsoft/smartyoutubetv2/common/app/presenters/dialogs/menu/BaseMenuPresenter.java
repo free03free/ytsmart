@@ -186,6 +186,23 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
                 ));
     }
 
+    /** "Add to collection": user-made groups such as Cartoons / Movies / Series. */
+    protected void appendAddToCollectionButton() {
+        Video original = getVideo();
+
+        if (original == null || (original.hasVideo() && !original.hasPlaylist()) || original.getTitle() == null) {
+            return; // plain video
+        }
+
+        getDialogPresenter().appendSingleButton(
+                UiOptionItem.from(
+                        getContext().getString(R.string.collection_add_to),
+                        optionItem -> {
+                            closeDialog();
+                            com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.LibraryCollectionsPresenter.instance(getContext()).showAddTo(original);
+                        }));
+    }
+
     /**
      * "Add to library" / "Remove from library". Always shown for playlist and channel cards,
      * independent of menu settings, sign-in state and server answers.

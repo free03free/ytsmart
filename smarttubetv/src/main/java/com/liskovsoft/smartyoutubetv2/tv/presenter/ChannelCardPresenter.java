@@ -43,7 +43,7 @@ public class ChannelCardPresenter extends LongClickPresenter {
         mDefaultBackgroundColor =
                 ContextCompat.getColor(context, Helpers.getThemeAttr(context, R.attr.cardDefaultBackground));
         mDefaultTextColor =
-                ContextCompat.getColor(context, R.color.card_default_text);
+                ViewUtil.isLightColor(mDefaultBackgroundColor) ? 0xFF212121 : ContextCompat.getColor(context, R.color.card_default_text);
         mNewContentBackgroundColor =
                 ContextCompat.getColor(context, R.color.dark_red);
         mSelectedBackgroundColor =
@@ -72,7 +72,8 @@ public class ChannelCardPresenter extends LongClickPresenter {
         container.setOnFocusChangeListener((v, hasFocus) -> {
             int backgroundColor = hasFocus ? mSelectedBackgroundColor :
                     textView.getTag(R.id.channel_new_content) != null ? mNewContentBackgroundColor : mDefaultBackgroundColor;
-            int textColor = hasFocus ? mSelectedTextColor : mDefaultTextColor;
+            int textColor = hasFocus ? mSelectedTextColor :
+                    textView.getTag(R.id.channel_new_content) != null ? 0xFFFFFFFF : mDefaultTextColor;
             
             textView.setBackgroundColor(backgroundColor);
             textView.setTextColor(textColor);
@@ -105,6 +106,7 @@ public class ChannelCardPresenter extends LongClickPresenter {
 
         // We should setup props each time because object may be reused by the underlying RecyclerView
         textView.setBackgroundColor(video.hasNewContent ? mNewContentBackgroundColor : mDefaultBackgroundColor);
+        textView.setTextColor(video.hasNewContent ? 0xFFFFFFFF : mDefaultTextColor);
         textView.setTag(R.id.channel_new_content, video.hasNewContent ? true : null);
 
 
