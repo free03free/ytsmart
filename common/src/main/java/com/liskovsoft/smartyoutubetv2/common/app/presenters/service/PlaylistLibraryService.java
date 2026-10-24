@@ -31,6 +31,18 @@ public class PlaylistLibraryService {
         return Observable.defer(() -> buildLibrary(context, contentService));
     }
 
+    /** A channel/playlist whose content is loaded from the network. */
+    private static class Source {
+        final MediaItem item;
+        final boolean showShelf;
+        List<MediaGroup> groups;
+
+        Source(MediaItem item, boolean showShelf) {
+            this.item = item;
+            this.showShelf = showShelf;
+        }
+    }
+
     private static Observable<List<MediaGroup>> buildLibrary(Context context, ContentService contentService) {
         final LibrarySettings settings = LibrarySettings.instance(context);
         final String mineTitle = context.getString(R.string.playlist_library_mine);
@@ -58,10 +70,10 @@ public class PlaylistLibraryService {
 
         List<MediaGroup> localShelves = new ArrayList<>();
         if (settings.isSavedPlaylistsShown() && !savedPlaylists.isEmpty()) {
-            localShelves.add(new LibraryGroup(null, title(settings, context.getString(R.string.playlist_library_saved), savedPlaylists.size()), savedPlaylists));
+            localShelves.add(new LibraryGroup(null, title(settings, "\u2B50 ", context.getString(R.string.playlist_library_saved), savedPlaylists.size()), savedPlaylists));
         }
         if (settings.isSavedChannelsShown() && !savedChannels.isEmpty()) {
-            localShelves.add(new LibraryGroup(null, title(settings, context.getString(R.string.playlist_library_channels), savedChannels.size()), savedChannels));
+            localShelves.add(new LibraryGroup(null, title(settings, "\uD83D\uDCFA ", context.getString(R.string.playlist_library_channels), savedChannels.size()), savedChannels));
         }
         Observable<List<MediaGroup>> local = localShelves.isEmpty() ? Observable.<List<MediaGroup>>empty() :
                 Observable.<List<MediaGroup>>just(localShelves);
@@ -84,50 +96,161 @@ public class PlaylistLibraryService {
                     if (items.isEmpty()) {
                         return Collections.<MediaGroup>emptyList();
                     }
-                    return Collections.<MediaGroup>singletonList(new LibraryGroup(group, title(settings, mineTitle, items.size()), items));
+                    return Collections.<MediaGroup>singletonList(new LibraryGroup(group, title(settings, "\uD83D\uDCC1 ", mineTitle, items.size()), items));
                 })
                 .onErrorResumeNext(Observable.<List<MediaGroup>>empty());
 
-        // 3) One shelf per saved channel (Netflix-like)
-        Observable<List<MediaGroup>> savedChannelShelves = !settings.isSavedChannelShelvesShown() ? Observable.<List<MediaGroup>>empty() :
-                Observable.fromIterable(savedChannels)
-                .concatMap(channel -> channelShelfObserve(settings, contentService, channel, seen));
+        // 3) Network part: load every source ONCE, then build "latest videos" + one shelf per source from the same data
+        final boolean wantLatest = settings.isLatestShown();
+        final boolean wantSavedShelves = settings.isSavedChannelShelvesShown();
 
-        // 4) One shelf per subscribed channel
-        Observable<List<MediaGroup>> fromChannels = !settings.isSubscribedShelvesShown() ? Observable.<List<MediaGroup>>empty() :
+        List<Source> saved = new ArrayList<>();
+        for (MediaItem item : savedChannels) {
+            saved.add(new Source(item, wantSavedShelves));
+        }
+        if (wantLatest) { // saved playlists only feed the "latest" shelf
+            for (MediaItem item : savedPlaylists) {
+                saved.add(new Source(item, false));
+            }
+        }
+
+        final boolean wantSubscribed = settings.isSubscribedShelvesShown() || wantLatest;
+        Observable<Source> subscribed = !wantSubscribed ? Observable.<Source>empty() :
                 contentService.getSubscribedChannelsByLastViewedObserve()
                 .flatMap(channels -> {
                     List<MediaItem> list = channels.getMediaItems();
-                    List<MediaItem> limited = new ArrayList<MediaItem>();
+                    List<Source> limited = new ArrayList<>();
                     if (list != null) {
-                        limited.addAll(list.subList(0, Math.min(settings.getMaxSubscribedChannels(), list.size())));
+                        for (MediaItem item : list.subList(0, Math.min(settings.getMaxSubscribedChannels(), list.size()))) {
+                            limited.add(new Source(item, settings.isSubscribedShelvesShown()));
+                        }
                     }
-                    return Observable.<MediaItem>fromIterable(limited);
+                    return Observable.<Source>fromIterable(limited);
                 })
-                .concatMap(channel -> channelShelfObserve(settings, contentService, channel, seen))
-                .onErrorResumeNext(Observable.<List<MediaGroup>>empty());
+                .onErrorResumeNext(Observable.<Source>empty());
+
+        Observable<List<MediaGroup>> network = Observable.concat(Observable.fromIterable(saved), subscribed)
+                .concatMap(source -> contentService.getChannelObserve(source.item)
+                        .map(groups -> {
+                            source.groups = groups;
+                            return source;
+                        })
+                        .onErrorResumeNext(Observable.<Source>empty()))
+                .toList()
+                .toObservable()
+                .map(sources -> networkShelves(settings, context, sources, seen));
 
         // Fast shelves first, slow network shelves after
         if (settings.getOrder() == LibrarySettings.ORDER_ACCOUNT_FIRST) {
-            return Observable.concat(mine, local, savedChannelShelves, fromChannels);
+            return Observable.concat(mine, local, network);
         }
-        return Observable.concat(local, mine, savedChannelShelves, fromChannels);
+        return Observable.concat(local, mine, network);
     }
 
-    private static String title(LibrarySettings settings, String name, int count) {
-        return settings.isCountShown() ? name + " (" + count + ")" : name;
+    private static List<MediaGroup> networkShelves(LibrarySettings settings, Context context, List<Source> sources, Set<String> seen) {
+        List<MediaGroup> result = new ArrayList<>();
+        Set<String> channelsDone = new HashSet<>();
+
+        // Newest videos of everything the user follows, mixed into one shelf (round robin between sources)
+        if (settings.isLatestShown()) {
+            List<List<MediaItem>> perSource = new ArrayList<>();
+            for (Source source : sources) {
+                List<MediaItem> videos = firstVideos(source.groups, settings.getLatestPerSource());
+                if (!videos.isEmpty()) {
+                    perSource.add(videos);
+                }
+            }
+
+            List<MediaItem> mixed = new ArrayList<>();
+            Set<String> videoIds = new HashSet<>();
+            for (int i = 0; i < settings.getLatestPerSource() && mixed.size() < settings.getLatestTotal(); i++) {
+                for (List<MediaItem> videos : perSource) {
+                    if (i < videos.size() && mixed.size() < settings.getLatestTotal() && videoIds.add(videos.get(i).getVideoId())) {
+                        mixed.add(videos.get(i));
+                    }
+                }
+            }
+
+            if (!mixed.isEmpty()) {
+                result.add(new LibraryGroup(null, title(settings, "\uD83D\uDD25 ", context.getString(R.string.playlist_library_latest), mixed.size()), mixed));
+            }
+        }
+
+        // One shelf per source (Netflix-like)
+        for (Source source : sources) {
+            if (!source.showShelf) {
+                continue;
+            }
+            String key = source.item.getChannelId() != null ? source.item.getChannelId() : source.item.getTitle();
+            if (key != null && !channelsDone.add(key)) {
+                continue; // same channel saved and subscribed
+            }
+            result.addAll(channelShelf(settings, context, source.item, source.groups, seen));
+        }
+
+        return result;
     }
 
-    private static Observable<List<MediaGroup>> channelShelfObserve(LibrarySettings settings, ContentService contentService, MediaItem channel, Set<String> seen) {
-        return contentService.getChannelObserve(channel)
-                .map(groups -> channelShelf(settings, channel, groups, seen))
-                .onErrorResumeNext(Observable.<List<MediaGroup>>empty());
+    /** Videos (not playlists/channels) of the first non-empty shelf. */
+    private static List<MediaItem> firstVideos(List<MediaGroup> groups, int limit) {
+        List<MediaItem> result = new ArrayList<>();
+
+        if (groups == null) {
+            return result;
+        }
+
+        for (MediaGroup group : groups) {
+            if (group == null || group.getMediaItems() == null) {
+                continue;
+            }
+            for (MediaItem item : group.getMediaItems()) {
+                if (item != null && item.getVideoId() != null && item.getType() != MediaItem.TYPE_PLAYLIST) {
+                    result.add(item);
+                    if (result.size() >= limit) {
+                        return result;
+                    }
+                }
+            }
+            if (!result.isEmpty()) {
+                return result;
+            }
+        }
+
+        return result;
     }
 
-    private static List<MediaGroup> channelShelf(LibrarySettings settings, MediaItem channel, List<MediaGroup> groups, Set<String> seen) {
+    private static String title(LibrarySettings settings, String icon, String name, int count) {
+        String text = settings.isIconsShown() ? icon + name : name;
+        return settings.isCountShown() ? text + "  \u2022  " + count : text;
+    }
+
+    /** Subscription items often have no title: fall back to the author, then to the first video's author. */
+    private static String nameOf(Context context, MediaItem channel, List<MediaGroup> groups) {
+        if (channel.getTitle() != null && !channel.getTitle().trim().isEmpty()) {
+            return channel.getTitle();
+        }
+        if (channel.getAuthor() != null && !channel.getAuthor().trim().isEmpty()) {
+            return channel.getAuthor();
+        }
+        if (groups != null) {
+            for (MediaGroup group : groups) {
+                if (group == null || group.getMediaItems() == null) {
+                    continue;
+                }
+                for (MediaItem item : group.getMediaItems()) {
+                    if (item != null && item.getAuthor() != null && !item.getAuthor().trim().isEmpty()) {
+                        return item.getAuthor();
+                    }
+                }
+            }
+        }
+        return context.getString(R.string.playlist_library_channel_fallback);
+    }
+
+    private static List<MediaGroup> channelShelf(LibrarySettings settings, Context context, MediaItem channel, List<MediaGroup> groups, Set<String> seen) {
         final int mode = settings.getChannelContent();
         final int limit = settings.getItemsPerShelf();
-        final String name = channel.getTitle() != null ? channel.getTitle() : "";
+        final String name = nameOf(context, channel, groups);
 
         if (groups == null) {
             return Collections.emptyList();
@@ -153,7 +276,7 @@ public class PlaylistLibraryService {
 
             if (!all.isEmpty() && first != null) {
                 List<MediaItem> limited = new ArrayList<>(all.subList(0, Math.min(limit, all.size())));
-                return Collections.<MediaGroup>singletonList(new LibraryGroup(first, title(settings, name, limited.size()), limited));
+                return Collections.<MediaGroup>singletonList(new LibraryGroup(first, title(settings, "\uD83C\uDFAC ", name, limited.size()), limited));
             }
 
             if (mode == LibrarySettings.CHANNEL_CONTENT_PLAYLISTS) {
@@ -166,7 +289,7 @@ public class PlaylistLibraryService {
             if (group != null && group.getMediaItems() != null && !group.getMediaItems().isEmpty()) {
                 List<MediaItem> items = group.getMediaItems();
                 List<MediaItem> limited = new ArrayList<>(items.subList(0, Math.min(limit, items.size())));
-                return Collections.<MediaGroup>singletonList(new LibraryGroup(group, title(settings, name, limited.size()), limited));
+                return Collections.<MediaGroup>singletonList(new LibraryGroup(group, title(settings, "\uD83C\uDFAC ", name, limited.size()), limited));
             }
         }
 

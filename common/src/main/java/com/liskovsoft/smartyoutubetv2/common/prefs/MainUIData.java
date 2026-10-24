@@ -421,6 +421,90 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
                 "App.Theme.Leanback.Blue.OLED.Browse",
                 "App.Theme.Leanback.Blue.Preferences",
                 mContext));
+        mColorSchemes.add(new ColorScheme(
+                R.string.color_scheme_lib_navy,
+                "App.Theme.Lib.navy.Player",
+                "App.Theme.Lib.navy.Browse",
+                "App.Theme.Lib.navy.Preferences",
+                mContext));
+        mColorSchemes.add(new ColorScheme(
+                R.string.color_scheme_lib_forest,
+                "App.Theme.Lib.forest.Player",
+                "App.Theme.Lib.forest.Browse",
+                "App.Theme.Lib.forest.Preferences",
+                mContext));
+        mColorSchemes.add(new ColorScheme(
+                R.string.color_scheme_lib_purple,
+                "App.Theme.Lib.purple.Player",
+                "App.Theme.Lib.purple.Browse",
+                "App.Theme.Lib.purple.Preferences",
+                mContext));
+        mColorSchemes.add(new ColorScheme(
+                R.string.color_scheme_lib_wine,
+                "App.Theme.Lib.wine.Player",
+                "App.Theme.Lib.wine.Browse",
+                "App.Theme.Lib.wine.Preferences",
+                mContext));
+        mColorSchemes.add(new ColorScheme(
+                R.string.color_scheme_lib_brown,
+                "App.Theme.Lib.brown.Player",
+                "App.Theme.Lib.brown.Browse",
+                "App.Theme.Lib.brown.Preferences",
+                mContext));
+        mColorSchemes.add(new ColorScheme(
+                R.string.color_scheme_lib_slate,
+                "App.Theme.Lib.slate.Player",
+                "App.Theme.Lib.slate.Browse",
+                "App.Theme.Lib.slate.Preferences",
+                mContext));
+        mColorSchemes.add(new ColorScheme(
+                R.string.color_scheme_lib_deepteal,
+                "App.Theme.Lib.deepteal.Player",
+                "App.Theme.Lib.deepteal.Browse",
+                "App.Theme.Lib.deepteal.Preferences",
+                mContext));
+        mColorSchemes.add(new ColorScheme(
+                R.string.color_scheme_lib_sunset,
+                "App.Theme.Lib.sunset.Player",
+                "App.Theme.Lib.sunset.Browse",
+                "App.Theme.Lib.sunset.Preferences",
+                mContext));
+        mColorSchemes.add(new ColorScheme(
+                R.string.color_scheme_lib_white,
+                "App.Theme.Lib.white.Player",
+                "App.Theme.Lib.white.Browse",
+                "App.Theme.Lib.white.Preferences",
+                mContext));
+        mColorSchemes.add(new ColorScheme(
+                R.string.color_scheme_lib_lightgrey,
+                "App.Theme.Lib.lightgrey.Player",
+                "App.Theme.Lib.lightgrey.Browse",
+                "App.Theme.Lib.lightgrey.Preferences",
+                mContext));
+        mColorSchemes.add(new ColorScheme(
+                R.string.color_scheme_lib_cream,
+                "App.Theme.Lib.cream.Player",
+                "App.Theme.Lib.cream.Browse",
+                "App.Theme.Lib.cream.Preferences",
+                mContext));
+        mColorSchemes.add(new ColorScheme(
+                R.string.color_scheme_lib_lightblue,
+                "App.Theme.Lib.lightblue.Player",
+                "App.Theme.Lib.lightblue.Browse",
+                "App.Theme.Lib.lightblue.Preferences",
+                mContext));
+        mColorSchemes.add(new ColorScheme(
+                R.string.color_scheme_lib_mint,
+                "App.Theme.Lib.mint.Player",
+                "App.Theme.Lib.mint.Browse",
+                "App.Theme.Lib.mint.Preferences",
+                mContext));
+        mColorSchemes.add(new ColorScheme(
+                R.string.color_scheme_lib_pink,
+                "App.Theme.Lib.pink.Player",
+                "App.Theme.Lib.pink.Browse",
+                "App.Theme.Lib.pink.Preferences",
+                mContext));
     }
 
     private void restoreState() {

@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Text on light page backgrounds (row titles) -->
+    <style name="App.RowHeader.Dark" parent="Widget.Leanback.Row.Header">
+        <item name="android:textColor">#212121</item>
+    </style>
+    <style name="App.RowHeader.Light" parent="Widget.Leanback.Row.Header">
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+
+    <!-- Color scheme: Navy -->
+    <style name="App.Theme.Lib.navy.Browse" parent="App.Theme.Leanback.Browse">
+        <item name="android:windowBackground">@color/lib_navy_bg</item>
+        <item name="shelfBackground">@color/lib_navy_bg</item>
+        <item name="brandColor">@color/lib_navy_side</item>
+        <item name="brandAccentColor">@color/lib_navy_accent</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_navy_accent</item>
+        <item name="cardDefaultBackground">@color/lib_navy_card</item>
+        <item name="appLogo">@null</item>
+    </style>
+    <style name="App.Theme.Lib.navy.Player" parent="App.Theme.Leanback.Player">
+        <item name="shelfBackground">@color/lib_navy_bg</item>
+        <item name="cardDefaultBackground">@color/lib_navy_card</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_navy_accent</item>
+    </style>
+    <style name="App.Theme.Lib.navy.Preferences" parent="App.Theme.Leanback.Preferences">
+        <item name="android:colorPrimary" tools:targetApi="21">@color/lib_navy_side</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_navy_accent</item>
+    </style>
+
+    <!-- Color scheme: Forest -->
+    <style name="App.Theme.Lib.forest.Browse" parent="App.Theme.Leanback.Browse">
+        <item name="android:windowBackground">@color/lib_forest_bg</item>
+        <item name="shelfBackground">@color/lib_forest_bg</item>
+        <item name="brandColor">@color/lib_forest_side</item>
+        <item name="brandAccentColor">@color/lib_forest_accent</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_forest_accent</item>
+        <item name="cardDefaultBackground">@color/lib_forest_card</item>
+        <item name="appLogo">@null</item>
+    </style>
+    <style name="App.Theme.Lib.forest.Player" parent="App.Theme.Leanback.Player">
+        <item name="shelfBackground">@color/lib_forest_bg</item>
+        <item name="cardDefaultBackground">@color/lib_forest_card</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_forest_accent</item>
+    </style>
+    <style name="App.Theme.Lib.forest.Preferences" parent="App.Theme.Leanback.Preferences">
+        <item name="android:colorPrimary" tools:targetApi="21">@color/lib_forest_side</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_forest_accent</item>
+    </style>
+
+    <!-- Color scheme: Purple -->
+    <style name="App.Theme.Lib.purple.Browse" parent="App.Theme.Leanback.Browse">
+        <item name="android:windowBackground">@color/lib_purple_bg</item>
+        <item name="shelfBackground">@color/lib_purple_bg</item>
+        <item name="brandColor">@color/lib_purple_side</item>
+        <item name="brandAccentColor">@color/lib_purple_accent</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_purple_accent</item>
+        <item name="cardDefaultBackground">@color/lib_purple_card</item>
+        <item name="appLogo">@null</item>
+    </style>
+    <style name="App.Theme.Lib.purple.Player" parent="App.Theme.Leanback.Player">
+        <item name="shelfBackground">@color/lib_purple_bg</item>
+        <item name="cardDefaultBackground">@color/lib_purple_card</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_purple_accent</item>
+    </style>
+    <style name="App.Theme.Lib.purple.Preferences" parent="App.Theme.Leanback.Preferences">
+        <item name="android:colorPrimary" tools:targetApi="21">@color/lib_purple_side</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_purple_accent</item>
+    </style>
+
+    <!-- Color scheme: Wine -->
+    <style name="App.Theme.Lib.wine.Browse" parent="App.Theme.Leanback.Browse">
+        <item name="android:windowBackground">@color/lib_wine_bg</item>
+        <item name="shelfBackground">@color/lib_wine_bg</item>
+        <item name="brandColor">@color/lib_wine_side</item>
+        <item name="brandAccentColor">@color/lib_wine_accent</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_wine_accent</item>
+        <item name="cardDefaultBackground">@color/lib_wine_card</item>
+        <item name="appLogo">@null</item>
+    </style>
+    <style name="App.Theme.Lib.wine.Player" parent="App.Theme.Leanback.Player">
+        <item name="shelfBackground">@color/lib_wine_bg</item>
+        <item name="cardDefaultBackground">@color/lib_wine_card</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_wine_accent</item>
+    </style>
+    <style name="App.Theme.Lib.wine.Preferences" parent="App.Theme.Leanback.Preferences">
+        <item name="android:colorPrimary" tools:targetApi="21">@color/lib_wine_side</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_wine_accent</item>
+    </style>
+
+    <!-- Color scheme: Coffee -->
+    <style name="App.Theme.Lib.brown.Browse" parent="App.Theme.Leanback.Browse">
+        <item name="android:windowBackground">@color/lib_brown_bg</item>
+        <item name="shelfBackground">@color/lib_brown_bg</item>
+        <item name="brandColor">@color/lib_brown_side</item>
+        <item name="brandAccentColor">@color/lib_brown_accent</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_brown_accent</item>
+        <item name="cardDefaultBackground">@color/lib_brown_card</item>
+        <item name="appLogo">@null</item>
+    </style>
+    <style name="App.Theme.Lib.brown.Player" parent="App.Theme.Leanback.Player">
+        <item name="shelfBackground">@color/lib_brown_bg</item>
+        <item name="cardDefaultBackground">@color/lib_brown_card</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_brown_accent</item>
+    </style>
+    <style name="App.Theme.Lib.brown.Preferences" parent="App.Theme.Leanback.Preferences">
+        <item name="android:colorPrimary" tools:targetApi="21">@color/lib_brown_side</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_brown_accent</item>
+    </style>
+
+    <!-- Color scheme: Slate -->
+    <style name="App.Theme.Lib.slate.Browse" parent="App.Theme.Leanback.Browse">
+        <item name="android:windowBackground">@color/lib_slate_bg</item>
+        <item name="shelfBackground">@color/lib_slate_bg</item>
+        <item name="brandColor">@color/lib_slate_side</item>
+        <item name="brandAccentColor">@color/lib_slate_accent</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_slate_accent</item>
+        <item name="cardDefaultBackground">@color/lib_slate_card</item>
+        <item name="appLogo">@null</item>
+    </style>
+    <style name="App.Theme.Lib.slate.Player" parent="App.Theme.Leanback.Player">
+        <item name="shelfBackground">@color/lib_slate_bg</item>
+        <item name="cardDefaultBackground">@color/lib_slate_card</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_slate_accent</item>
+    </style>
+    <style name="App.Theme.Lib.slate.Preferences" parent="App.Theme.Leanback.Preferences">
+        <item name="android:colorPrimary" tools:targetApi="21">@color/lib_slate_side</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_slate_accent</item>
+    </style>
+
+    <!-- Color scheme: Deep teal -->
+    <style name="App.Theme.Lib.deepteal.Browse" parent="App.Theme.Leanback.Browse">
+        <item name="android:windowBackground">@color/lib_deepteal_bg</item>
+        <item name="shelfBackground">@color/lib_deepteal_bg</item>
+        <item name="brandColor">@color/lib_deepteal_side</item>
+        <item name="brandAccentColor">@color/lib_deepteal_accent</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_deepteal_accent</item>
+        <item name="cardDefaultBackground">@color/lib_deepteal_card</item>
+        <item name="appLogo">@null</item>
+    </style>
+    <style name="App.Theme.Lib.deepteal.Player" parent="App.Theme.Leanback.Player">
+        <item name="shelfBackground">@color/lib_deepteal_bg</item>
+        <item name="cardDefaultBackground">@color/lib_deepteal_card</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_deepteal_accent</item>
+    </style>
+    <style name="App.Theme.Lib.deepteal.Preferences" parent="App.Theme.Leanback.Preferences">
+        <item name="android:colorPrimary" tools:targetApi="21">@color/lib_deepteal_side</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_deepteal_accent</item>
+    </style>
+
+    <!-- Color scheme: Sunset -->
+    <style name="App.Theme.Lib.sunset.Browse" parent="App.Theme.Leanback.Browse">
+        <item name="android:windowBackground">@color/lib_sunset_bg</item>
+        <item name="shelfBackground">@color/lib_sunset_bg</item>
+        <item name="brandColor">@color/lib_sunset_side</item>
+        <item name="brandAccentColor">@color/lib_sunset_accent</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_sunset_accent</item>
+        <item name="cardDefaultBackground">@color/lib_sunset_card</item>
+        <item name="appLogo">@null</item>
+    </style>
+    <style name="App.Theme.Lib.sunset.Player" parent="App.Theme.Leanback.Player">
+        <item name="shelfBackground">@color/lib_sunset_bg</item>
+        <item name="cardDefaultBackground">@color/lib_sunset_card</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_sunset_accent</item>
+    </style>
+    <style name="App.Theme.Lib.sunset.Preferences" parent="App.Theme.Leanback.Preferences">
+        <item name="android:colorPrimary" tools:targetApi="21">@color/lib_sunset_side</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_sunset_accent</item>
+    </style>
+
+    <!-- Color scheme: White -->
+    <style name="App.Theme.Lib.white.Browse" parent="App.Theme.Leanback.Browse">
+        <item name="android:windowBackground">@color/lib_white_bg</item>
+        <item name="shelfBackground">@color/lib_white_bg</item>
+        <item name="brandColor">@color/lib_white_side</item>
+        <item name="brandAccentColor">@color/lib_white_accent</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_white_accent</item>
+        <item name="cardDefaultBackground">@color/lib_white_card</item>
+        <item name="rowHeaderStyle">@style/App.RowHeader.Dark</item>
+        <item name="titleTextColor">#212121</item>
+        <item name="cardSelectedBackground">@color/card_selected_background_white_grey</item>
+        <item name="appLogo">@null</item>
+    </style>
+    <style name="App.Theme.Lib.white.Player" parent="App.Theme.Leanback.Player">
+        <item name="shelfBackground">@color/lib_white_bg</item>
+        <item name="cardDefaultBackground">@color/lib_white_card</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_white_accent</item>
+    </style>
+    <style name="App.Theme.Lib.white.Preferences" parent="App.Theme.Leanback.Preferences">
+        <item name="android:colorPrimary" tools:targetApi="21">@color/lib_white_side</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_white_accent</item>
+    </style>
+
+    <!-- Color scheme: Light grey -->
+    <style name="App.Theme.Lib.lightgrey.Browse" parent="App.Theme.Leanback.Browse">
+        <item name="android:windowBackground">@color/lib_lightgrey_bg</item>
+        <item name="shelfBackground">@color/lib_lightgrey_bg</item>
+        <item name="brandColor">@color/lib_lightgrey_side</item>
+        <item name="brandAccentColor">@color/lib_lightgrey_accent</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_lightgrey_accent</item>
+        <item name="cardDefaultBackground">@color/lib_lightgrey_card</item>
+        <item name="rowHeaderStyle">@style/App.RowHeader.Dark</item>
+        <item name="titleTextColor">#212121</item>
+        <item name="cardSelectedBackground">@color/card_selected_background_white_grey</item>
+        <item name="appLogo">@null</item>
+    </style>
+    <style name="App.Theme.Lib.lightgrey.Player" parent="App.Theme.Leanback.Player">
+        <item name="shelfBackground">@color/lib_lightgrey_bg</item>
+        <item name="cardDefaultBackground">@color/lib_lightgrey_card</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_lightgrey_accent</item>
+    </style>
+    <style name="App.Theme.Lib.lightgrey.Preferences" parent="App.Theme.Leanback.Preferences">
+        <item name="android:colorPrimary" tools:targetApi="21">@color/lib_lightgrey_side</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_lightgrey_accent</item>
+    </style>
+
+    <!-- Color scheme: Cream -->
+    <style name="App.Theme.Lib.cream.Browse" parent="App.Theme.Leanback.Browse">
+        <item name="android:windowBackground">@color/lib_cream_bg</item>
+        <item name="shelfBackground">@color/lib_cream_bg</item>
+        <item name="brandColor">@color/lib_cream_side</item>
+        <item name="brandAccentColor">@color/lib_cream_accent</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_cream_accent</item>
+        <item name="cardDefaultBackground">@color/lib_cream_card</item>
+        <item name="rowHeaderStyle">@style/App.RowHeader.Dark</item>
+        <item name="titleTextColor">#212121</item>
+        <item name="cardSelectedBackground">@color/card_selected_background_white_grey</item>
+        <item name="appLogo">@null</item>
+    </style>
+    <style name="App.Theme.Lib.cream.Player" parent="App.Theme.Leanback.Player">
+        <item name="shelfBackground">@color/lib_cream_bg</item>
+        <item name="cardDefaultBackground">@color/lib_cream_card</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_cream_accent</item>
+    </style>
+    <style name="App.Theme.Lib.cream.Preferences" parent="App.Theme.Leanback.Preferences">
+        <item name="android:colorPrimary" tools:targetApi="21">@color/lib_cream_side</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_cream_accent</item>
+    </style>
+
+    <!-- Color scheme: Light blue -->
+    <style name="App.Theme.Lib.lightblue.Browse" parent="App.Theme.Leanback.Browse">
+        <item name="android:windowBackground">@color/lib_lightblue_bg</item>
+        <item name="shelfBackground">@color/lib_lightblue_bg</item>
+        <item name="brandColor">@color/lib_lightblue_side</item>
+        <item name="brandAccentColor">@color/lib_lightblue_accent</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_lightblue_accent</item>
+        <item name="cardDefaultBackground">@color/lib_lightblue_card</item>
+        <item name="rowHeaderStyle">@style/App.RowHeader.Dark</item>
+        <item name="titleTextColor">#212121</item>
+        <item name="cardSelectedBackground">@color/card_selected_background_white_grey</item>
+        <item name="appLogo">@null</item>
+    </style>
+    <style name="App.Theme.Lib.lightblue.Player" parent="App.Theme.Leanback.Player">
+        <item name="shelfBackground">@color/lib_lightblue_bg</item>
+        <item name="cardDefaultBackground">@color/lib_lightblue_card</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_lightblue_accent</item>
+    </style>
+    <style name="App.Theme.Lib.lightblue.Preferences" parent="App.Theme.Leanback.Preferences">
+        <item name="android:colorPrimary" tools:targetApi="21">@color/lib_lightblue_side</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_lightblue_accent</item>
+    </style>
+
+    <!-- Color scheme: Mint -->
+    <style name="App.Theme.Lib.mint.Browse" parent="App.Theme.Leanback.Browse">
+        <item name="android:windowBackground">@color/lib_mint_bg</item>
+        <item name="shelfBackground">@color/lib_mint_bg</item>
+        <item name="brandColor">@color/lib_mint_side</item>
+        <item name="brandAccentColor">@color/lib_mint_accent</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_mint_accent</item>
+        <item name="cardDefaultBackground">@color/lib_mint_card</item>
+        <item name="rowHeaderStyle">@style/App.RowHeader.Dark</item>
+        <item name="titleTextColor">#212121</item>
+        <item name="cardSelectedBackground">@color/card_selected_background_white_grey</item>
+        <item name="appLogo">@null</item>
+    </style>
+    <style name="App.Theme.Lib.mint.Player" parent="App.Theme.Leanback.Player">
+        <item name="shelfBackground">@color/lib_mint_bg</item>
+        <item name="cardDefaultBackground">@color/lib_mint_card</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_mint_accent</item>
+    </style>
+    <style name="App.Theme.Lib.mint.Preferences" parent="App.Theme.Leanback.Preferences">
+        <item name="android:colorPrimary" tools:targetApi="21">@color/lib_mint_side</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_mint_accent</item>
+    </style>
+
+    <!-- Color scheme: Light pink -->
+    <style name="App.Theme.Lib.pink.Browse" parent="App.Theme.Leanback.Browse">
+        <item name="android:windowBackground">@color/lib_pink_bg</item>
+        <item name="shelfBackground">@color/lib_pink_bg</item>
+        <item name="brandColor">@color/lib_pink_side</item>
+        <item name="brandAccentColor">@color/lib_pink_accent</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_pink_accent</item>
+        <item name="cardDefaultBackground">@color/lib_pink_card</item>
+        <item name="rowHeaderStyle">@style/App.RowHeader.Dark</item>
+        <item name="titleTextColor">#212121</item>
+        <item name="cardSelectedBackground">@color/card_selected_background_white_grey</item>
+        <item name="appLogo">@null</item>
+    </style>
+    <style name="App.Theme.Lib.pink.Player" parent="App.Theme.Leanback.Player">
+        <item name="shelfBackground">@color/lib_pink_bg</item>
+        <item name="cardDefaultBackground">@color/lib_pink_card</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_pink_accent</item>
+    </style>
+    <style name="App.Theme.Lib.pink.Preferences" parent="App.Theme.Leanback.Preferences">
+        <item name="android:colorPrimary" tools:targetApi="21">@color/lib_pink_side</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/lib_pink_accent</item>
+    </style>
+</resources>

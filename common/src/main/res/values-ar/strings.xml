@@ -778,4 +778,24 @@
   <string name="library_reset">إعادة ضبط إعدادات المكتبة</string>
   <string name="library_reset_done">تمت إعادة ضبط إعدادات المكتبة</string>
   <string name="library_reopen_hint">أعد فتح مكتبة القوائم لتطبيق التغييرات</string>
+  <string name="playlist_library_latest">أحدث الفيديوهات</string>
+  <string name="playlist_library_channel_fallback">قناة</string>
+  <string name="library_opt_latest">أحدث فيديوهات كل ما أتابعه</string>
+  <string name="library_opt_icons">إظهار الرموز في عناوين الصفوف</string>
+  <string name="library_cat_latest_total">صف أحدث الفيديوهات: إجمالي الفيديوهات</string>
+  <string name="library_cat_latest_per_source">صف أحدث الفيديوهات: فيديوهات لكل قناة</string>
+  <string name="color_scheme_lib_navy">كحلي</string>
+  <string name="color_scheme_lib_forest">أخضر غابة</string>
+  <string name="color_scheme_lib_purple">بنفسجي</string>
+  <string name="color_scheme_lib_wine">عنابي</string>
+  <string name="color_scheme_lib_brown">بني قهوة</string>
+  <string name="color_scheme_lib_slate">رمادي مزرق</string>
+  <string name="color_scheme_lib_deepteal">فيروزي داكن</string>
+  <string name="color_scheme_lib_sunset">غروب برتقالي</string>
+  <string name="color_scheme_lib_white">أبيض</string>
+  <string name="color_scheme_lib_lightgrey">رمادي فاتح</string>
+  <string name="color_scheme_lib_cream">كريمي</string>
+  <string name="color_scheme_lib_lightblue">أزرق سماوي فاتح</string>
+  <string name="color_scheme_lib_mint">أخضر نعناعي</string>
+  <string name="color_scheme_lib_pink">وردي فاتح</string>
 </resources>

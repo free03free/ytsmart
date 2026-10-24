@@ -35,12 +35,14 @@ public class LibrarySettingsPresenter extends BasePresenter<Void> {
         shelves.add(UiOptionItem.from(str(R.string.library_opt_mine), o -> mSettings.setMyPlaylistsShown(o.isSelected()), mSettings.isMyPlaylistsShown()));
         shelves.add(UiOptionItem.from(str(R.string.library_opt_saved_channel_shelves), o -> mSettings.setSavedChannelShelvesShown(o.isSelected()), mSettings.isSavedChannelShelvesShown()));
         shelves.add(UiOptionItem.from(str(R.string.library_opt_subscribed_shelves), o -> mSettings.setSubscribedShelvesShown(o.isSelected()), mSettings.isSubscribedShelvesShown()));
+        shelves.add(0, UiOptionItem.from(str(R.string.library_opt_latest), o -> mSettings.setLatestShown(o.isSelected()), mSettings.isLatestShown()));
         dialog.appendCheckedCategory(str(R.string.library_cat_shelves), shelves);
 
         // 2) Details
         List<OptionItem> details = new ArrayList<>();
         details.add(UiOptionItem.from(str(R.string.library_opt_hide_system), o -> mSettings.setSystemListsHidden(o.isSelected()), mSettings.isSystemListsHidden()));
         details.add(UiOptionItem.from(str(R.string.library_opt_show_count), o -> mSettings.setCountShown(o.isSelected()), mSettings.isCountShown()));
+        details.add(UiOptionItem.from(str(R.string.library_opt_icons), o -> mSettings.setIconsShown(o.isSelected()), mSettings.isIconsShown()));
         dialog.appendCheckedCategory(str(R.string.library_cat_details), details);
 
         // 3) Order
@@ -68,6 +70,18 @@ public class LibrarySettingsPresenter extends BasePresenter<Void> {
             items.add(UiOptionItem.from(String.valueOf(n), o -> mSettings.setItemsPerShelf(n), mSettings.getItemsPerShelf() == n));
         }
         dialog.appendRadioCategory(str(R.string.library_cat_items_per_shelf), items);
+
+        List<OptionItem> latestTotal = new ArrayList<>();
+        for (int n : new int[] {15, 30, 50, 80}) {
+            latestTotal.add(UiOptionItem.from(String.valueOf(n), o -> mSettings.setLatestTotal(n), mSettings.getLatestTotal() == n));
+        }
+        dialog.appendRadioCategory(str(R.string.library_cat_latest_total), latestTotal);
+
+        List<OptionItem> latestPer = new ArrayList<>();
+        for (int n : new int[] {2, 3, 5, 8}) {
+            latestPer.add(UiOptionItem.from(String.valueOf(n), o -> mSettings.setLatestPerSource(n), mSettings.getLatestPerSource() == n));
+        }
+        dialog.appendRadioCategory(str(R.string.library_cat_latest_per_source), latestPer);
 
         // 6) Reset
         dialog.appendSingleButton(UiOptionItem.from(str(R.string.library_reset), o -> {

@@ -786,4 +786,24 @@
     <string name="library_reset">Reset library settings</string>
     <string name="library_reset_done">Library settings reset</string>
     <string name="library_reopen_hint">Reopen the Playlist library to apply changes</string>
+    <string name="playlist_library_latest">Latest videos</string>
+    <string name="playlist_library_channel_fallback">Channel</string>
+    <string name="library_opt_latest">Latest videos from everything I follow</string>
+    <string name="library_opt_icons">Show icons in shelf titles</string>
+    <string name="library_cat_latest_total">Latest videos shelf: total videos</string>
+    <string name="library_cat_latest_per_source">Latest videos shelf: videos per channel</string>
+    <string name="color_scheme_lib_navy">Navy</string>
+    <string name="color_scheme_lib_forest">Forest</string>
+    <string name="color_scheme_lib_purple">Purple</string>
+    <string name="color_scheme_lib_wine">Wine</string>
+    <string name="color_scheme_lib_brown">Coffee</string>
+    <string name="color_scheme_lib_slate">Slate</string>
+    <string name="color_scheme_lib_deepteal">Deep teal</string>
+    <string name="color_scheme_lib_sunset">Sunset</string>
+    <string name="color_scheme_lib_white">White</string>
+    <string name="color_scheme_lib_lightgrey">Light grey</string>
+    <string name="color_scheme_lib_cream">Cream</string>
+    <string name="color_scheme_lib_lightblue">Light blue</string>
+    <string name="color_scheme_lib_mint">Mint</string>
+    <string name="color_scheme_lib_pink">Light pink</string>
 </resources>

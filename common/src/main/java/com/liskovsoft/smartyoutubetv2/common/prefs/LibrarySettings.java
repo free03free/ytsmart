@@ -57,6 +57,19 @@ public class LibrarySettings {
     public boolean isCountShown() { return mPrefs.getBoolean("show_count", true); }
     public void setCountShown(boolean v) { mPrefs.edit().putBoolean("show_count", v).apply(); }
 
+    /** Combined shelf with the newest videos of every saved/subscribed source. */
+    public boolean isLatestShown() { return mPrefs.getBoolean("show_latest", true); }
+    public void setLatestShown(boolean v) { mPrefs.edit().putBoolean("show_latest", v).apply(); }
+
+    public int getLatestTotal() { return mPrefs.getInt("latest_total", 30); }
+    public void setLatestTotal(int v) { mPrefs.edit().putInt("latest_total", v).apply(); }
+
+    public int getLatestPerSource() { return mPrefs.getInt("latest_per_source", 5); }
+    public void setLatestPerSource(int v) { mPrefs.edit().putInt("latest_per_source", v).apply(); }
+
+    public boolean isIconsShown() { return mPrefs.getBoolean("show_icons", true); }
+    public void setIconsShown(boolean v) { mPrefs.edit().putBoolean("show_icons", v).apply(); }
+
     public void reset() {
         String local = mPrefs.getString("local_items_v2", "[]"); // keep the saved items, reset only the settings
         boolean added = mPrefs.getBoolean("added", false);
