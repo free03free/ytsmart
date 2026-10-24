@@ -53,6 +53,33 @@ public class LibrarySettings {
     public int getItemsPerShelf() { return mPrefs.getInt("items_per_shelf", 20); }
     public void setItemsPerShelf(int v) { mPrefs.edit().putInt("items_per_shelf", v).apply(); }
 
+    /** Items per shelf as a real limit: 0 (or less) means "no limit". */
+    public int getItemsLimit() { int v = getItemsPerShelf(); return v <= 0 ? Integer.MAX_VALUE : v; }
+
+    /** Custom order of the library rows (JSON array of row keys). Empty = default order. */
+    public java.util.List<String> getShelfOrderList() {
+        java.util.List<String> result = new java.util.ArrayList<>();
+        try {
+            JSONArray array = new JSONArray(mPrefs.getString("shelf_order_v1", "[]"));
+            for (int i = 0; i < array.length(); i++) {
+                result.add(array.getString(i));
+            }
+        } catch (Exception e) {
+            // NOP
+        }
+        return result;
+    }
+
+    public void setShelfOrderList(java.util.List<String> keys) {
+        JSONArray array = new JSONArray();
+        if (keys != null) {
+            for (String key : keys) {
+                array.put(key);
+            }
+        }
+        mPrefs.edit().putString("shelf_order_v1", array.toString()).apply();
+    }
+
     public int getChannelContent() { return mPrefs.getInt("channel_content", CHANNEL_CONTENT_PLAYLISTS_OR_VIDEOS); }
     public void setChannelContent(int v) { mPrefs.edit().putInt("channel_content", v).apply(); }
 
@@ -71,6 +98,14 @@ public class LibrarySettings {
 
     public int getLatestPerSource() { return mPrefs.getInt("latest_per_source", 5); }
     public void setLatestPerSource(int v) { mPrefs.edit().putInt("latest_per_source", v).apply(); }
+
+    /** The "Search" card inside the "My collections" row. */
+    public boolean isSearchShown() { return mPrefs.getBoolean("show_search", true); }
+    public void setSearchShown(boolean v) { mPrefs.edit().putBoolean("show_search", v).apply(); }
+
+    /** Bottom row with the "refresh library" / "refresh collections" cards. */
+    public boolean isRefreshRowShown() { return mPrefs.getBoolean("show_refresh_row", true); }
+    public void setRefreshRowShown(boolean v) { mPrefs.edit().putBoolean("show_refresh_row", v).apply(); }
 
     public boolean isIconsShown() { return mPrefs.getBoolean("show_icons", true); }
     public void setIconsShown(boolean v) { mPrefs.edit().putBoolean("show_icons", v).apply(); }

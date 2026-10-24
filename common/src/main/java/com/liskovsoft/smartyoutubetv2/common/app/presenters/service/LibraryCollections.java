@@ -37,6 +37,7 @@ public class LibraryCollections {
     private static String sOpenSearch; // search query shown inside the library row (memory only)
 
     public static final String MARK_SEARCH = "lib_search";
+    public static final String MARK_REFRESH = "lib_refresh";
     public static final int SORT_MANUAL = 0;
     public static final int SORT_NAME = 1;
     public static final int SORT_NEWEST = 2;

@@ -26,6 +26,7 @@ public class AppUpdatePresenter extends BasePresenter<Void> implements AppUpdate
     private final AppDialogPresenter mSettingsPresenter;
     private final String[] mUpdateManifestUrls;
     private boolean mIsForceCheck;
+    private boolean mIsCustomSource; // update comes from the user's own site: installing is allowed
 
     public AppUpdatePresenter(Context context) {
         super(context);
@@ -48,7 +49,23 @@ public class AppUpdatePresenter extends BasePresenter<Void> implements AppUpdate
         sInstance = null;
     }
 
+    /** Check the user's own update site (address set in "About"). The official check only notifies. */
+    public void startCustom() {
+        String url = com.liskovsoft.smartyoutubetv2.common.prefs.CustomUpdateSettings.instance(getContext()).getUrl();
+
+        if (url == null || url.trim().isEmpty()) {
+            MessageHelpers.showMessage(getContext(), R.string.custom_update_no_url);
+            return;
+        }
+
+        mIsCustomSource = true;
+        mIsForceCheck = true;
+        LoadingManager.showLoading(getContext(), true);
+        mUpdateChecker.forceCheckForUpdates(new String[] {url.trim()});
+    }
+
     public void start(boolean forceCheck) {
+        mIsCustomSource = false;
         mIsForceCheck = forceCheck;
 
         if (forceCheck) {
@@ -93,11 +110,15 @@ public class AppUpdatePresenter extends BasePresenter<Void> implements AppUpdate
             return;
         }
 
-        mSettingsPresenter.appendSingleButton(
-                UiOptionItem.from(getContext().getString(R.string.install_update), optionItem -> {
-                    GeneralData.instance(getContext()).setChangelog(changelog);
-                    mUpdateChecker.installUpdate();
-                }, false));
+        // Official update: notification only (installing it would erase the custom changes of this build).
+        // Update from the user's own site: installation allowed.
+        if (mIsCustomSource) {
+            mSettingsPresenter.appendSingleButton(
+                    UiOptionItem.from(getContext().getString(R.string.install_update), optionItem -> {
+                        GeneralData.instance(getContext()).setChangelog(changelog);
+                        mUpdateChecker.installUpdate();
+                    }, false));
+        }
         mSettingsPresenter.appendStringsCategory(getContext().getString(R.string.update_changelog), createChangelogOptions(changelog));
         //mSettingsPresenter.appendSingleSwitch(UiOptionItem.from(getContext().getString(R.string.show_again), optionItem -> {
         //    mUpdateChecker.enableUpdateCheck(optionItem.isSelected());
@@ -116,8 +137,7 @@ public class AppUpdatePresenter extends BasePresenter<Void> implements AppUpdate
         BrowsePresenter.instance(getContext()).pinItem(getContext().getString(R.string.update_found), R.drawable.action_info, new ErrorFragmentData() {
             @Override
             public void onAction() {
-                GeneralData.instance(getContext()).setChangelog(changelog);
-                mUpdateChecker.installUpdate();
+                // Notification only: no installation (keeps the custom changes of this build)
             }
 
             @Override
@@ -129,7 +149,7 @@ public class AppUpdatePresenter extends BasePresenter<Void> implements AppUpdate
 
             @Override
             public String getActionText() {
-                return getContext().getString(R.string.install_update);
+                return getContext().getString(R.string.update_notice_ok);
             }
         });
     }

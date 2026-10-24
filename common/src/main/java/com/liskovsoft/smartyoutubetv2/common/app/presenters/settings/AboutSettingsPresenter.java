@@ -45,6 +45,7 @@ public class AboutSettingsPresenter extends BasePresenter<Void> {
         String country = LocaleUtility.getCurrentLocale(getContext()).getCountry();
 
         appendUpdateCheckButton(settingsPresenter);
+        CustomUpdateButtons.append(settingsPresenter, getContext());
 
         appendAutoUpdateSwitch(settingsPresenter);
 

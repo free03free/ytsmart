@@ -36,6 +36,7 @@ public class AboutSimpleSettingsPresenter extends BasePresenter<Void> {
         appendAutoUpdateSwitch(settingsPresenter);
 
         appendUpdateCheckButton(settingsPresenter);
+        CustomUpdateButtons.append(settingsPresenter, getContext());
 
         appendInstallBridge(settingsPresenter);
 

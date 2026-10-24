@@ -40,6 +40,10 @@ public class VideoActionPresenter extends BasePresenter<Void> {
                 LibraryCollections.back(getContext());
                 BrowsePresenter.instance(getContext()).refresh(false);
                 return;
+            } else if (item.reloadPageKey.equals(LibraryCollections.MARK_REFRESH)) {
+                MessageHelpers.showMessage(getContext(), getContext().getString(R.string.library_refreshing));
+                BrowsePresenter.instance(getContext()).refresh(false);
+                return;
             } else if (item.reloadPageKey.equals(LibraryCollections.MARK_SEARCH)) {
                 com.liskovsoft.smartyoutubetv2.common.utils.SimpleEditDialog.show(getContext(),
                         getContext().getString(R.string.collection_search),

@@ -70,10 +70,10 @@ public class PlaylistLibraryService {
 
         List<MediaGroup> localShelves = new ArrayList<>();
         if (!settings.isKidsMode() && settings.isSavedPlaylistsShown() && !savedPlaylists.isEmpty()) {
-            localShelves.add(new LibraryGroup(null, title(settings, "\u2B50 ", context.getString(R.string.playlist_library_saved), savedPlaylists.size()), savedPlaylists));
+            localShelves.add(new LibraryGroup(null, title(settings, "\u2B50 ", context.getString(R.string.playlist_library_saved), savedPlaylists.size()), savedPlaylists).withKey("sys:saved"));
         }
         if (!settings.isKidsMode() && settings.isSavedChannelsShown() && !savedChannels.isEmpty()) {
-            localShelves.add(new LibraryGroup(null, title(settings, "\uD83D\uDCFA ", context.getString(R.string.playlist_library_channels), savedChannels.size()), savedChannels));
+            localShelves.add(new LibraryGroup(null, title(settings, "\uD83D\uDCFA ", context.getString(R.string.playlist_library_channels), savedChannels.size()), savedChannels).withKey("sys:channels"));
         }
         String openName = LibraryCollections.getOpen();
         if (openName != null && !LibraryCollections.exists(context, openName)) {
@@ -127,10 +127,11 @@ public class PlaylistLibraryService {
             List<MediaItem> all = new ArrayList<>(pinnedCards);
             all.addAll(cards);
             if (!all.isEmpty()) {
-                if (!settings.isKidsMode()) {
+                boolean withSearch = !settings.isKidsMode() && settings.isSearchShown();
+                if (withSearch) {
                     all.add(0, collectionCard(LibraryCollections.MARK_SEARCH, context.getString(R.string.collection_search), null, null));
                 }
-                LibraryGroup group = new LibraryGroup(null, title(settings, "\uD83D\uDCC2 ", context.getString(R.string.collection_my), all.size() - (settings.isKidsMode() ? 0 : 1)), all);
+                LibraryGroup group = new LibraryGroup(null, title(settings, "\uD83D\uDCC2 ", context.getString(R.string.collection_my), all.size() - (withSearch ? 1 : 0)), all).withKey("sys:collections");
                 if (!pinnedCards.isEmpty()) {
                     localShelves.add(0, group); // pinned collections: the row goes to the very top
                 } else {
@@ -162,7 +163,7 @@ public class PlaylistLibraryService {
                     if (items.isEmpty()) {
                         return Collections.<MediaGroup>emptyList();
                     }
-                    return Collections.<MediaGroup>singletonList(new LibraryGroup(group, title(settings, "\uD83D\uDCC1 ", mineTitle, items.size()), items));
+                    return Collections.<MediaGroup>singletonList(new LibraryGroup(group, title(settings, "\uD83D\uDCC1 ", mineTitle, items.size()), items).withKey("sys:mine"));
                 })
                 .onErrorResumeNext(Observable.<List<MediaGroup>>empty());
 
@@ -197,6 +198,12 @@ public class PlaylistLibraryService {
 
         Observable<List<MediaGroup>> network = Observable.concat(Observable.fromIterable(saved), subscribed)
                 .concatMap(source -> contentService.getChannelObserve(source.item)
+                        .concatMap(groups -> {
+                            if (!source.showShelf) {
+                                return Observable.<List<MediaGroup>>just(groups);
+                            }
+                            return fillGroups(contentService, groups, settings);
+                        })
                         .map(groups -> {
                             source.groups = groups;
                             return source;
@@ -215,7 +222,7 @@ public class PlaylistLibraryService {
                         for (MediaItem item : group.getMediaItems()) {
                             if (item != null && item.getVideoId() != null && item.getPercentWatched() >= 3 && item.getPercentWatched() < 95) {
                                 items.add(item);
-                                if (items.size() >= settings.getItemsPerShelf()) {
+                                if (items.size() >= settings.getItemsLimit()) {
                                     break;
                                 }
                             }
@@ -224,15 +231,120 @@ public class PlaylistLibraryService {
                     if (items.isEmpty()) {
                         return Collections.<MediaGroup>emptyList();
                     }
-                    return Collections.<MediaGroup>singletonList(new LibraryGroup(group, title(settings, "\u25B6\uFE0F ", context.getString(R.string.playlist_library_continue), items.size()), items));
+                    return Collections.<MediaGroup>singletonList(new LibraryGroup(group, title(settings, "\u25B6\uFE0F ", context.getString(R.string.playlist_library_continue), items.size()), items).withKey("sys:continue"));
                 })
                 .onErrorResumeNext(Observable.<List<MediaGroup>>empty());
 
         // Fast shelves first, slow network shelves after
+        Observable<List<MediaGroup>> everything;
         if (settings.getOrder() == LibrarySettings.ORDER_ACCOUNT_FIRST) {
-            return Observable.concat(mine, local, keepWatching, network);
+            everything = Observable.concat(mine, local, keepWatching, network);
+        } else {
+            everything = Observable.concat(local, keepWatching, mine, network);
         }
-        return Observable.concat(local, keepWatching, mine, network);
+
+        // Custom row order chosen by the user: wait for all rows, then sort them once
+        final List<String> custom = settings.getShelfOrderList();
+
+        // Always the last row: refresh buttons
+        final Observable<List<MediaGroup>> refreshRow = !settings.isRefreshRowShown() ? Observable.<List<MediaGroup>>empty() :
+                Observable.defer(() -> {
+                    List<MediaItem> cards = new ArrayList<>();
+                    cards.add(collectionCard(LibraryCollections.MARK_REFRESH, context.getString(R.string.library_refresh_library), null, null));
+                    List<MediaGroup> row = new ArrayList<>();
+                    row.add(new LibraryGroup(null, title(settings, "\uD83D\uDD04 ", context.getString(R.string.library_refresh_title), cards.size()), cards).withKey("sys:refresh"));
+                    return Observable.<List<MediaGroup>>just(row);
+                });
+
+        if (custom.isEmpty()) {
+            return Observable.concat(everything, refreshRow);
+        }
+        return Observable.concat(
+                everything.toList().toObservable()
+                        .map(lists -> sortShelves(lists, custom))
+                        .filter(list -> !list.isEmpty()),
+                refreshRow);
+    }
+
+    private static List<MediaGroup> sortShelves(List<List<MediaGroup>> lists, final List<String> order) {
+        List<MediaGroup> flat = new ArrayList<>();
+        for (List<MediaGroup> list : lists) {
+            if (list != null) {
+                flat.addAll(list);
+            }
+        }
+        Collections.sort(flat, (a, b) -> Integer.compare(orderIndex(a, order), orderIndex(b, order))); // stable
+        return flat;
+    }
+
+    private static int orderIndex(MediaGroup group, List<String> order) {
+        if (group instanceof LibraryGroup && ((LibraryGroup) group).getKey() != null) {
+            int index = order.indexOf(((LibraryGroup) group).getKey());
+            if (index >= 0) {
+                return index;
+            }
+        }
+        return Integer.MAX_VALUE; // rows that are not in the custom order keep their place at the end
+    }
+
+    private static final int MAX_PAGES = 40; // safety net for "no limit"
+
+    /** Loads more pages of the channel shelf until the wanted number of items is reached (or the pages end). */
+    private static Observable<List<MediaGroup>> fillGroups(ContentService contentService, List<MediaGroup> groups, LibrarySettings settings) {
+        final int limit = settings.getItemsLimit();
+        final int index = pickShelfGroup(groups, settings.getChannelContent());
+        if (index < 0) {
+            return Observable.<List<MediaGroup>>just(groups);
+        }
+        final MediaGroup base = groups.get(index);
+        final List<MediaItem> all = new ArrayList<>(base.getMediaItems());
+        return nextPages(contentService, base, all, limit, MAX_PAGES).map(last -> {
+            List<MediaGroup> result = new ArrayList<>(groups);
+            result.set(index, new LibraryGroup(base, base.getTitle(), all));
+            return result;
+        });
+    }
+
+    private static int pickShelfGroup(List<MediaGroup> groups, int mode) {
+        if (groups == null) {
+            return -1;
+        }
+        if (mode != LibrarySettings.CHANNEL_CONTENT_VIDEOS) {
+            for (int i = 0; i < groups.size(); i++) {
+                MediaGroup group = groups.get(i);
+                if (group != null && group.getMediaItems() != null) {
+                    for (MediaItem item : group.getMediaItems()) {
+                        if (item != null && item.getType() == MediaItem.TYPE_PLAYLIST) {
+                            return i;
+                        }
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < groups.size(); i++) {
+            MediaGroup group = groups.get(i);
+            if (group != null && group.getMediaItems() != null && !group.getMediaItems().isEmpty()) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private static Observable<MediaGroup> nextPages(ContentService contentService, MediaGroup current, List<MediaItem> all, int limit, int pagesLeft) {
+        if (pagesLeft <= 0 || all.size() >= limit || current.getNextPageKey() == null) {
+            return Observable.just(current);
+        }
+        return contentService.continueGroupObserve(current)
+                .take(1)
+                .concatMap(next -> {
+                    if (next == null || next.getMediaItems() == null || next.getMediaItems().isEmpty()) {
+                        return Observable.just(current);
+                    }
+                    all.addAll(next.getMediaItems());
+                    return nextPages(contentService, next, all, limit, pagesLeft - 1);
+                })
+                .onErrorResumeNext(Observable.just(current))
+                .defaultIfEmpty(current);
     }
 
     private static List<MediaGroup> networkShelves(LibrarySettings settings, Context context, List<Source> sources, Set<String> seen) {
@@ -260,7 +372,7 @@ public class PlaylistLibraryService {
             }
 
             if (!mixed.isEmpty()) {
-                result.add(new LibraryGroup(null, title(settings, "\uD83D\uDD25 ", context.getString(R.string.playlist_library_latest), mixed.size()), mixed));
+                result.add(new LibraryGroup(null, title(settings, "\uD83D\uDD25 ", context.getString(R.string.playlist_library_latest), mixed.size()), mixed).withKey("sys:latest"));
             }
         }
 
@@ -284,7 +396,12 @@ public class PlaylistLibraryService {
                 settings.setSeenTop(rowKey, top.get(0).getVideoId());
             }
 
-            result.addAll(channelShelf(settings, context, source.item, source.groups, seen, isNew));
+            for (MediaGroup shelf : channelShelf(settings, context, source.item, source.groups, seen, isNew)) {
+                if (shelf instanceof LibraryGroup) {
+                    ((LibraryGroup) shelf).withKey(rowKey);
+                }
+                result.add(shelf);
+            }
         }
 
         return result;
@@ -374,7 +491,7 @@ public class PlaylistLibraryService {
 
     private static List<MediaGroup> channelShelf(LibrarySettings settings, Context context, MediaItem channel, List<MediaGroup> groups, Set<String> seen, boolean isNew) {
         final int mode = settings.getChannelContent();
-        final int limit = settings.getItemsPerShelf();
+        final int limit = settings.getItemsLimit();
         final String name = (isNew ? "\uD83C\uDD95 " : "") + nameOf(context, channel, groups);
 
         if (groups == null) {
@@ -448,12 +565,16 @@ public class PlaylistLibraryService {
         private final MediaGroup mSource;
         private final String mTitle;
         private final List<MediaItem> mItems;
+        private String mKey;
 
         LibraryGroup(MediaGroup source, String title, List<MediaItem> items) {
             mSource = source;
             mTitle = title;
             mItems = items;
         }
+
+        LibraryGroup withKey(String key) { mKey = key; return this; }
+        String getKey() { return mKey; }
 
         @Override public int getType() { return mSource != null ? mSource.getType() : SECTION_ID; }
         @Override public List<MediaItem> getMediaItems() { return mItems; }

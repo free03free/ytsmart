@@ -51,7 +51,13 @@ public class LibrarySettingsPresenter extends BasePresenter<Void> {
     }
 
     private void appendNumberCategory(AppDialogPresenter dialog, int titleResId, String icon, int[] presets, int current, IntSetter setter) {
+        appendNumberCategory(dialog, titleResId, icon, presets, current, setter, false);
+    }
+
+    /** allowUnlimited: adds a "no limit" option, stored as 0. */
+    private void appendNumberCategory(AppDialogPresenter dialog, int titleResId, String icon, int[] presets, int current, IntSetter setter, boolean allowUnlimited) {
         List<OptionItem> options = new ArrayList<>();
+        final boolean isUnlimited = allowUnlimited && current <= 0;
         boolean isPreset = false;
         for (int n : presets) {
             if (n == current) {
@@ -60,12 +66,16 @@ public class LibrarySettingsPresenter extends BasePresenter<Void> {
             options.add(UiOptionItem.from(String.valueOf(n), o -> setter.set(n), n == current));
         }
 
-        String customTitle = isPreset ? str(R.string.library_custom)
+        if (allowUnlimited) {
+            options.add(UiOptionItem.from("\u267E\uFE0F " + str(R.string.library_unlimited), o -> setter.set(0), isUnlimited));
+        }
+
+        String customTitle = (isPreset || isUnlimited) ? str(R.string.library_custom)
                 : String.format(str(R.string.library_custom_current), current);
         options.add(UiOptionItem.from(customTitle, o -> {
             dialog.closeDialog();
             SimpleEditDialog.show(getContext(), str(titleResId), str(R.string.library_custom_prompt),
-                    String.valueOf(current), value -> {
+                    current > 0 ? String.valueOf(current) : "", value -> {
                         int number = parsePositive(value);
                         if (number <= 0) {
                             MessageHelpers.showMessage(getContext(), str(R.string.library_custom_invalid));
@@ -75,7 +85,7 @@ public class LibrarySettingsPresenter extends BasePresenter<Void> {
                         showSettings();
                         return true;
                     });
-        }, !isPreset));
+        }, !isPreset && !isUnlimited));
 
         dialog.appendRadioCategory(icon + str(titleResId), options);
     }
@@ -174,7 +184,8 @@ public class LibrarySettingsPresenter extends BasePresenter<Void> {
             showSettings();
         }));
 
-        dialog.showDialog(ICON_REORDER + str(R.string.library_reorder));
+        LibraryRefresh.cancel();
+        dialog.showDialog(ICON_REORDER + str(R.string.library_reorder), () -> LibraryRefresh.schedule(getContext()));
     }
 
     private void showMoveSection(String id) {
@@ -190,7 +201,8 @@ public class LibrarySettingsPresenter extends BasePresenter<Void> {
             showReorder();
         }));
 
-        dialog.showDialog(sectionTitle(id));
+        LibraryRefresh.cancel();
+        dialog.showDialog(sectionTitle(id), () -> LibraryRefresh.schedule(getContext()));
     }
 
     private void showSettings() {
@@ -215,6 +227,8 @@ public class LibrarySettingsPresenter extends BasePresenter<Void> {
         List<OptionItem> details = new ArrayList<>();
         details.add(UiOptionItem.from("\uD83D\uDE48 " + str(R.string.library_opt_hide_system), o -> mSettings.setSystemListsHidden(o.isSelected()), mSettings.isSystemListsHidden()));
         details.add(UiOptionItem.from("\uD83D\uDD22 " + str(R.string.library_opt_show_count), o -> mSettings.setCountShown(o.isSelected()), mSettings.isCountShown()));
+        details.add(UiOptionItem.from("\uD83D\uDD0D " + str(R.string.library_opt_search), o -> mSettings.setSearchShown(o.isSelected()), mSettings.isSearchShown()));
+        details.add(UiOptionItem.from("\uD83D\uDD04 " + str(R.string.library_opt_refresh_row), o -> mSettings.setRefreshRowShown(o.isSelected()), mSettings.isRefreshRowShown()));
         details.add(UiOptionItem.from("\uD83D\uDDBC\uFE0F " + str(R.string.library_opt_icons), o -> mSettings.setIconsShown(o.isSelected()), mSettings.isIconsShown()));
         SidebarService sidebar = SidebarService.instance(getContext());
         details.add(UiOptionItem.from("\uD83D\uDE80 " + str(R.string.library_opt_boot),
@@ -247,8 +261,8 @@ public class LibrarySettingsPresenter extends BasePresenter<Void> {
         });
 
         sections.put("items", () -> {
-            appendNumberCategory(dialog, R.string.library_cat_items_per_shelf, ICON_ITEMS, new int[] {10, 20, 30, 50},
-                    mSettings.getItemsPerShelf(), mSettings::setItemsPerShelf);
+            appendNumberCategory(dialog, R.string.library_cat_items_per_shelf, ICON_ITEMS, new int[] {15, 20, 30, 50, 100},
+                    mSettings.getItemsPerShelf(), mSettings::setItemsPerShelf, true);
         });
 
         sections.put("latest_total", () -> {
@@ -309,7 +323,8 @@ public class LibrarySettingsPresenter extends BasePresenter<Void> {
             showReorder();
         }));
 
-        dialog.showDialog(str(R.string.library_settings_title), () -> MessageHelpers.showMessage(getContext(), str(R.string.library_reopen_hint)));
+        LibraryRefresh.cancel();
+        dialog.showDialog(str(R.string.library_settings_title), () -> LibraryRefresh.schedule(getContext()));
     }
 
     private void toggleKidsMode() {
